@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cops.scada.dao.ProductInfoAttrValueDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.cops.scada.entity.ProductInfoAttrValue">
+    <result column="id" property="id" />
+    <result column="create_date" property="createDate" />
+    <result column="create_by" property="createBy" />
+    <result column="update_date" property="updateDate" />
+    <result column="update_by" property="updateBy" />
+    <result column="remarks" property="remarks" />
+    <result column="del_flag" property="delFlag" />
+        <result column="product_info_id" property="productInfoId" />
+        <result column="series_attr_id" property="seriesAttrId" />
+        <result column="value" property="value" />
+        <result column="value_en" property="valueEn" />
+    </resultMap>
+    <select id="listBy" resultType="com.cops.scada.entity.VO.ProductInfoAttrAndValueVO">
+        SELECT
+        series.NAME series_name,
+        product_info.name product_info_name,
+        series_attr.id series_attr_id,
+        series_attr.name series_attr_name,
+        series_and_attr.sort series_attr_sort,
+        product_info_attr_value.value product_info_attr_value,
+        product_info_attr_value.value_en product_info_attr_value_en,
+        series_attr.value_type series_attr_value_type,
+        series_attr.company series_attr_company
+        FROM
+        scada_product_info_attr_value product_info_attr_value
+        left join scada_product_info product_info on product_info.id = product_info_attr_value.product_info_id
+        LEFT JOIN scada_series series ON product_info.series_id = series.id
+        left join scada_series_attr series_attr on product_info_attr_value.series_attr_id = series_attr.id
+        left join scada_series_and_attr series_and_attr on (series_and_attr.series_attr_id = series_attr.id and series_and_attr.series_id = series.id)
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+    <select id="listForNameId" resultType="java.lang.Long">
+        select product_info_id
+        from scada_product_info_attr_value
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+    <select id="listForConditionBy" resultType="com.cops.scada.entity.ProductInfoAttrValue">
+        select product_info_attr_value.value, product_info_attr_value.value_en
+        from scada_product_info_attr_value product_info_attr_value
+        left join scada_product_info product_info on product_info_attr_value.product_info_id = product_info.id
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+
+</mapper>

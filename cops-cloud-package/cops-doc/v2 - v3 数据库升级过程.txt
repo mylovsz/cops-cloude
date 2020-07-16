@@ -1,0 +1,65 @@
+v2 -> v3 数据库升级过程
+
+1.[修改]生产计划（scada_plan）
+    [新增]计划类型（type）: 0-主生产计划；1-半成品计划，默认值：0
+    [新增]计划规则（rule）: 0-默认；1-普通；2-返工；3-报废；4-返修；5-直接完工；6-期初生产；7-齐套检查；8-试产；9-试制，默认值：0
+    执行语句：
+        查询结果
+        select scada_product.name, scada_product.type, scada_plan.type plan_type, scada_plan.rule plan_rule
+        from scada_plan
+        left join scada_product on scada_plan.product_id = scada_product.id
+        where scada_product.type >= 9
+
+        a. 更新product的type<9的为主计划
+        update scada_plan left join scada_product on scada_plan.product_id = scada_product.id set scada_plan.type = 0 where scada_product.type < 9
+
+        b. 更新product的type>=9的为半成品
+        update scada_plan left join scada_product on scada_plan.product_id = scada_product.id set scada_plan.type = 1 where scada_product.type >= 9
+
+        c. 更新plan的rule为0
+        update scada_plan set rule = 0
+
+2.[新增,基础表]生产计划关联（scada_plan_link）
+    [新增]主生产计划（master_plan_id）
+    [新增]半成品生产计划（slave_plan_id）
+    [新增]注释（note）
+
+3.[新增,基础表]工时详情（scada_work_detail）
+    [新增]- [x] 工时管理编号（man_hour_id）
+	[新增]- [x] 日计划编号（plan_day_id）
+	[新增]- [x] 生产计划编号（plan_id）
+	[新增]- [x] 工艺编号（job_id）
+	[新增]- [x] 加工人（start_work_user_id）
+	[新增]补偿时间（reimbursed_time）
+	[新增]加工人数（start_work_user_num）
+	[新增]半成品投料（start_in_num）
+	[新增]计划完成数量（start_finish_num）
+	[新增]备注（start_remarks）
+	[新增]加工开始时间（start_date）
+	[新增]提交人（end_job_user_id）
+	[新增]合格产品数量（end_quantity_count）
+	[新增]备注（end_quantity_remarks）
+	[新增]报废数量（end_scrap_count）
+	[新增]报废理由（end_scrap_reason）
+	[新增]备注（end_scrap_remarks）
+	[新增]返修数量（end_repair_count）
+	[新增]返修原因（end_repair_reason）
+	[新增]备注（end_repair_remark）
+	[新增]加工结束时间（end_date）
+	[新增]加工有效时长(work_process_time)
+	[新增]状态（state）-1- 待产；0-加工中；1-完成；2-延期；3-暂停
+4.[新增,基础表]工卡信息（scada_user_card）
+	[新增]- [x] 用户编号（user_id)
+	[新增]类型（type）
+	[新增]进厂日期（join_date）
+	[新增]工号（sn）（0001019128）
+	[新增]- [x] 姓名（name）
+	[新增]- [x] 部门（department）
+	[新增]- [x] 职务（duty）
+	[新增]- [x] 卡号（card_sn）
+	[新增]办卡日期（create_card_date）
+
+5. 工单管理list采用        listV3
+6. 日计划管理list采用      listV3
+7. 新增菜单
+   工时管理-作业分派(workDetail/listV3)

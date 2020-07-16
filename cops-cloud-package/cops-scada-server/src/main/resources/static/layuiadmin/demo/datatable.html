@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <title>开始使用layui</title>
+    <link rel="stylesheet" href="../layui/css/layui.css">
+</head>
+
+<body>
+    <div>
+        <button type="button" data-type='newRows' class="layui-btn">从模板新增</button>
+        <button type="button" data-type='newRow' class="layui-btn">新增</button>
+        <button type="button" data-type='delRows' class="layui-btn">删除</button>
+        <button type="button" data-type='reload' class="layui-btn">重置</button>
+    </div>
+    <table class="layui-hide" id="dataList" lay-filter="dataList"></table>
+    <div id="div1" style="display: none;">
+        <table class="layui-hide" id="dataList1" lay-filter="dataList1"></table>
+    </div>
+    <!-- 你的HTML代码 -->
+    <script src="../layui/layui.js"></script>
+    <script>
+        //一般直接写在一个js文件中
+        layui.config({
+            base: '../../layui-common/'
+        }).extend({
+            dataTable: 'dataTable'
+        }).use(['dataTable'], function () {
+            var dt = layui.dataTable,
+                $ = layui.jquery;
+
+            dt.renderParentTable({
+                id: "#dataList",  // 主表id
+                data: {
+                    totalCount: 4,
+                    list: [
+                        { "id": 1, "username": "zhangsan", "email": "zhangsan", "sexvalue": "1", "sextext": "男", "time": "2018-08-22", "mobile": 13 },
+                        { "id": 2, "username": "lisi", "email": "lisi", "sexvalue": "2", "sextext": "女", "time": "2017-08-24", "mobile": 14 },
+                        { "id": 3, "username": "wanger", "email": "wanger", "sexvalue": "3", "sextext": "未知", "time": "2018-06-27", "mobile": 15 },
+                        { "id": 4, "username": "jianghao", "email": "jianghao", "sexvalue": "1", "sextext": "男", "time": "2018-08-22", "mobile": 16 }
+                    ]
+                },
+                compareKey: "username",
+                height: "full-100",
+                page: true,
+                limits: [5, 10, 50, 100],
+                limit: 50,
+                cols: [  // 主表列
+                    [{ type: "checkbox", fixed: "left", width: 50 }
+                        , { field: 'id', title: '排序', minWidth: 40, align: 'center', sort: true}
+                        , { field: 'username', title: 'username', minWidth: 150, align: "center"/*,edit: 'text'*/, event: 'chooseUser' }
+                        , { field: 'email', title: 'email', minWidth: 150, align: "center", edit: 'text', format: "mail" }
+                        , { field: 'sexvalue', style: "display:none;", type: "space", width: "0%" }
+                        , { field: 'sextext', title: 'sex', minWidth: 150, align: "center", templet: "#sexTpl", event: 'select' }
+                        , { field: 'time', title: 'time', minWidth: 150, align: "center", templet: "#timeTpl", event: 'chooseDate' }
+                        /**
+                         * format:"int" 整形
+                         * format:"num" 数值
+                         * format:"tel" 手机号
+                         * format:"money" 金额
+                         * format:"mail" 邮箱
+                         */
+                        , { field: 'mobile', title: 'mobile', minWidth: 150, align: "center", edit: 'text', format: "tel" }
+                    ]
+                ]
+            });
+
+            var active = {
+                newRows: function () {
+                    dt.renderDetaiTable({
+                        detailId: "#div1",  // 打开的弹出层id
+                        title: '添加新模型', // 打开的弹出层标题
+                        width: "850px",
+                        height: "450px",
+                        table: { // 弹出层中表格配置
+                            tableId: "#dataList1", // 子表id
+                            url: 'http://localhost:3000/user', // 子表请求的url
+                            // where: {
+                            //     "token": setter.token,
+                            // }, // 需传递后台的其他参数
+                            page: true,
+                            limits: [5, 10, 50, 100],
+                            limit: 50,
+                            compareKey: "username",
+                            map: [ // 父子表映射字段
+                                { parent: "username", detail: "username" },
+                                { parent: "email", detail: "email" },
+                                { parent: "mobile", detail: "mobile" }
+                            ],
+                            cols: [
+                                [
+                                    { type: "checkbox" }
+                                    , { field: 'username', title: 'username', minWidth: 150, align: "center" }
+                                    , { field: 'email', title: 'email', minWidth: 150, align: "center" }
+                                    , { field: 'mobile', title: 'mobile', minWidth: 150, align: "center" }
+                                ]
+                            ]
+                        }
+                    });
+                },
+                newRow: function () {
+                    dt.addParentRow();
+                },
+                delRows: function () {
+                    var delrows = dt.delParentRow();
+                    alert(delrows);
+                },
+                reload: function () {
+                    dt.renderParentTable({
+                        id: "#dataList",  // 主表id
+                        data: {
+                            totalCount: 4,
+                            list: [
+                                { "id": 1, "username": "zhangsan", "email": "zhangsan", "sexvalue": "1", "sextext": "男", "time": "2018-08-22", "mobile": 13 },
+                                { "id": 2, "username": "lisi", "email": "lisi", "sexvalue": "2", "sextext": "女", "time": "2017-08-24", "mobile": 14 },
+                                { "id": 3, "username": "wanger", "email": "wanger", "sexvalue": "3", "sextext": "未知", "time": "2018-06-27", "mobile": 15 },
+                                { "id": 4, "username": "jianghao", "email": "jianghao", "sexvalue": "1", "sextext": "男", "time": "2018-08-22", "mobile": 16 }
+                            ]
+                        },
+                        compareKey: "username",
+                        height: "full-100",
+                        page: true,
+                        limits: [5, 10, 50, 100],
+                        limit: 50,
+                        cols: [  // 主表列
+                            [{ type: "checkbox", fixed: "left", width: 50 }
+                                , { field: 'username', title: 'username', minWidth: 150, align: "center"/*,edit: 'text'*/, event: 'chooseUser' }
+                                , { field: 'email', title: 'email', minWidth: 150, align: "center", edit: 'text', format: "mail" }
+                                , { field: 'sexvalue', style: "display:none;", type: "space", width: "0%" }
+                                , { field: 'sextext', title: 'sex', minWidth: 150, align: "center", templet: "#sexTpl", event: 'select' }
+                                , { field: 'time', title: 'time', minWidth: 150, align: "center", templet: "#timeTpl", event: 'chooseDate' }
+                                /**
+                                 * format:"int" 整形
+                                 * format:"num" 数值
+                                 * format:"tel" 手机号
+                                 * format:"money" 金额
+                                 * format:"mail" 邮箱
+                                 */
+                                , { field: 'mobile', title: 'mobile', minWidth: 150, align: "center", edit: 'text', format: "tel" }
+                            ]
+                        ]
+                    });
+                }
+            }
+
+            $('.layui-btn').on('click', function () {
+                var type = $(this).data('type');
+                active[type] ? active[type].call(this) : '';
+            });
+        });
+    </script>
+</body>
+
+</html>

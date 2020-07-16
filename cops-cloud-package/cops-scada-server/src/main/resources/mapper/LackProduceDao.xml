@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cops.scada.dao.LackProduceDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.cops.scada.entity.LackProduce">
+    <result column="id" property="id" />
+    <result column="create_date" property="createDate" />
+    <result column="create_by" property="createBy" />
+    <result column="update_date" property="updateDate" />
+    <result column="update_by" property="updateBy" />
+    <result column="remarks" property="remarks" />
+    <result column="del_flag" property="delFlag" />
+        <result column="produce_id" property="produceId" />
+        <result column="type" property="type" />
+        <result column="current_site" property="currentSite" />
+        <result column="lack_site" property="lackSite" />
+        <result column="lack_num" property="lackNum" />
+        <result column="site_worker" property="siteWorker" />
+        <result column="site_info" property="siteInfo" />
+        <result column="state" property="state" />
+    </resultMap>
+    <select id="getPageLackProduceVO" resultType="com.cops.scada.entity.VO.LackProduceVO">
+        SELECT
+            plan.sn plan_sn,
+            plan.id plan_id,
+            product.sn product_sn,
+            product.id product_id,
+            produce.sn produce_sn,
+            lack_produce.*
+        FROM
+            scada_lack_produce lack_produce
+            LEFT JOIN scada_produce produce ON lack_produce.produce_id = produce.id
+            LEFT JOIN scada_plan plan ON produce.plan_id = plan.id
+            LEFT JOIN scada_product product ON plan.product_id = product.id
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+    <select id="getPageLackProduceVOUnion" resultType="com.cops.scada.entity.VO.LackProduceVO">
+        SELECT
+            plan.sn plan_sn,
+            plan.id plan_id,
+            product.sn product_sn,
+            product.id product_id,
+            produce.sn produce_sn,
+            lack_produce.*
+        FROM
+            (
+            SELECT
+                b.*
+            FROM
+                ( SELECT produce_id, max( id ) id FROM scada_lack_produce GROUP BY produce_id ) a
+                LEFT JOIN scada_lack_produce b ON a.id = b.id
+            ) lack_produce
+        LEFT JOIN scada_produce produce ON lack_produce.produce_id = produce.id
+        LEFT JOIN scada_plan plan ON produce.plan_id = plan.id
+        LEFT JOIN scada_product product ON plan.product_id = product.id
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+
+    <select id="getLackProduceByProduceSn" resultType="com.cops.scada.entity.VO.LackProduceVO">
+        SELECT
+            scada_lack_produce.*,
+            scada_produce.*,
+            scada_produce.sn produce_sn
+        FROM
+        scada_lack_produce LEFT JOIN scada_produce  ON scada_lack_produce.produce_id=scada_produce.id
+        <where>
+            ${ew.sqlSegment}
+        </where>
+        ORDER BY scada_lack_produce.create_date Desc
+    </select>
+
+</mapper>

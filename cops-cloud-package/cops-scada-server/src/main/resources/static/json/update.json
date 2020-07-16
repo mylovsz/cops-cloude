@@ -1,0 +1,9 @@
+{
+	"appName": "制造管理软件",
+	"versionCode": 6,
+	"versionName": "1.0.6",
+	"apkUrl": "http://58.211.26.114:31119/static/app/app.apk",
+	"changeLog": "本次更新内容：\n 新增排产状态上报",
+	"updateTips": "更新日志",
+	"forceUpgrade": "true"
+}

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cops.nc65.dao.ProductionOrderDao">
+    <select id="getProductionOrders" resultType="com.cops.entity.nc65.ProductionOrder">
+        SELECT
+        mmm_mo.cmoid mo_id,
+        mm_plo.vbillcode plo_bill_code,
+        bm_material.code material_code,
+        bm_material.name material_name,
+        bm_material.version material_version,
+        od_dept.name dept_name,
+        bw_wk.vwkname wk_name,
+        bb_bom.cbomid bom_id,
+        bb_bom.hversion bom_version,
+        mp_pmo.cpmohid pmo_id,
+        mp_pmo.vbillcode pmo_bill_code,
+        mp_pmo.fbillstatus pmo_bill_status,
+        mmm_mo.fsrcmooper mo_bill_type,
+        mmm_mo.nastnum num,
+        mmm_mo.ninastnum qualified_num,
+        mmm_mo.nmmastnum plan_output_num,
+        mmm_mo.nplanputastnum plan_put_num,
+        mmm_mo.nwrastnum complete_num,
+        mmm_mo.tplanstarttime plan_start_time,
+        mmm_mo.tplanendtime plan_end_time,
+        mmm_mo.tmoclosedtime closed_time,
+        mmm_mo.tactstarttime act_start_time,
+        mmm_mo.tactendtime act_end_time,
+        mmm_mo.twillendtime will_end_time,
+        mmm_mo.vbatchcode batch_code
+        FROM
+        nc65.mm_mo mmm_mo
+        LEFT JOIN nc65.mm_plo ON mmm_mo.vsrcid = mm_plo.cpoid
+        LEFT JOIN nc65.bd_material bm_material ON mmm_mo.cmaterialvid = bm_material.pk_material
+        LEFT JOIN nc65.bd_customer bc_customer ON mmm_mo.ccustomerid = bc_customer.pk_customer
+        LEFT JOIN nc65.bd_bom bb_bom ON mmm_mo.cbomversionid = bb_bom.cbomid -- 物料
+        LEFT JOIN nc65.mm_pmo mp_pmo ON mmm_mo.cpmohid = mp_pmo.cpmohid
+        LEFT JOIN nc65.pd_pb pp_pb ON mmm_mo.cbatchid = pp_pb.pk_batchcode
+        LEFT JOIN nc65.org_dept od_dept ON mmm_mo.cdeptid = od_dept.pk_dept
+        LEFT JOIN nc65.bd_wk bw_wk ON mmm_mo.cwkid = bw_wk.cwkid --
+        LEFT JOIN nc65.mm_batch_prod mbp_batch_prod ON mbp_batch_prod.vpbatchcode = mmm_mo.vbatchcode
+        <where>${ew.sqlSegment}</where>
+        ORDER BY
+        mmm_mo.vbatchcode desc
+    </select>
+    <select id="getPage" resultType="com.cops.entity.nc65.ProductionOrder">
+        SELECT
+        mmm_mo.cmoid mo_id,
+        mm_plo.vbillcode plo_bill_code,
+        bm_material.code material_code,
+        bm_material.name material_name,
+        bm_material.version material_version,
+        od_dept.name dept_name,
+        bw_wk.vwkname wk_name,
+        bb_bom.cbomid bom_id,
+        bb_bom.hversion bom_version,
+        mp_pmo.cpmohid pmo_id,
+        mp_pmo.vbillcode pmo_bill_code,
+        mp_pmo.fbillstatus pmo_bill_status,
+        mmm_mo.fsrcmooper mo_bill_type,
+        mmm_mo.nastnum num,
+        mmm_mo.ninastnum qualified_num,
+        mmm_mo.nmmastnum plan_output_num,
+        mmm_mo.nplanputastnum plan_put_num,
+        mmm_mo.nwrastnum complete_num,
+        mmm_mo.tplanstarttime plan_start_time,
+        mmm_mo.tplanendtime plan_end_time,
+        mmm_mo.tmoclosedtime closed_time,
+        mmm_mo.tactstarttime act_start_time,
+        mmm_mo.tactendtime act_end_time,
+        mmm_mo.twillendtime will_end_time,
+        mmm_mo.vbatchcode batch_code
+        FROM
+        nc65.mm_mo mmm_mo
+        LEFT JOIN nc65.mm_plo ON mmm_mo.vsrcid = mm_plo.cpoid
+        LEFT JOIN nc65.bd_material bm_material ON mmm_mo.cmaterialvid = bm_material.pk_material
+        LEFT JOIN nc65.bd_customer bc_customer ON mmm_mo.ccustomerid = bc_customer.pk_customer
+        LEFT JOIN nc65.bd_bom bb_bom ON mmm_mo.cbomversionid = bb_bom.cbomid -- 物料
+        LEFT JOIN nc65.mm_pmo mp_pmo ON mmm_mo.cpmohid = mp_pmo.cpmohid
+        LEFT JOIN nc65.pd_pb pp_pb ON mmm_mo.cbatchid = pp_pb.pk_batchcode
+        LEFT JOIN nc65.org_dept od_dept ON mmm_mo.cdeptid = od_dept.pk_dept
+        LEFT JOIN nc65.bd_wk bw_wk ON mmm_mo.cwkid = bw_wk.cwkid --
+        LEFT JOIN nc65.mm_batch_prod mbp_batch_prod ON mbp_batch_prod.vpbatchcode = mmm_mo.vbatchcode
+        <where>${ew.sqlSegment}</where>
+        ORDER BY
+        mmm_mo.vbatchcode desc
+    </select>
+</mapper>

@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cops.nc65.dao.BomDao">
+    <select id="getBomOnhandPage" resultType="com.cops.entity.nc65.BomOnhand">
+        SELECT
+        *
+        FROM
+        V_QUERY_BOM_ONHAND
+        <where>${ew.sqlSegment}</where>
+    </select>
+    <select id="getBomQueryV" resultType="com.cops.entity.nc65.BomQueryV">
+        SELECT
+            *
+        FROM
+            (
+            SELECT LEVEL
+                ,
+                v_query_bom.* ,
+                connect_by_isleaf AS status
+            FROM
+                v_query_bom v_query_bom START WITH v_query_bom.hcmaterialid = #{hcmaterialid} CONNECT BY ( PRIOR v_query_bom.cmaterialid ) = v_query_bom.hcmaterialid
+            ) a
+        WHERE
+            status = 0
+    </select>
+    <select id="getBom" resultType="com.cops.entity.nc65.Bom">
+        select
+            bb_bom.cbomid bom_id,
+            billmaker_user.user_name bill_maker,
+            approver_user.user_name approver_user,
+            bb_bom.bkititem kititem,
+            bb_bom.fbillstatus bom_status,
+            bb_bom.fbomtype bom_type,
+            bb_bom.hcecnid ecn_id,
+            bm_material.pk_material material_id,
+            bm_material.code material_code,
+            bm_material.name material_name,
+            bm_material.materialspec material_spec,
+            bb_bom.hfbomsource bom_source,
+            bb_bom.hfversiontype version_type,
+            bb_bom.hversion version,
+            bb_bom.hbdefault bom_default,
+            bb_bom.vbillcode bill_code
+            --bb_bom.*
+        from nc65.bd_bom bb_bom
+        LEFT JOIN nc65.sm_user approver_user ON bb_bom.approver = approver_user.cuserid
+        LEFT JOIN nc65.sm_user billmaker_user ON bb_bom.billmaker = billmaker_user.cuserid
+        left join nc65.bd_material bm_material on bb_bom.hcmaterialid = bm_material.pk_material
+        <where>${ew.sqlSegment}</where>
+    </select>
+    <select id="getBomOnhand" resultType="com.cops.entity.nc65.BomOnhand">
+        SELECT
+        bom_id,
+        (num*#{num}) num,
+        base_num,
+        b_material_id,
+        b_material_code,
+        b_material_name,
+        sum(hand_num) hand_num,
+        replace(wm_concat ( DISTINCT stor_name ), ',', '、') stor_name,
+        b_material_spec,
+        material_id,
+        material_code,
+        material_name,
+        version
+        FROM
+        V_QUERY_BOM_ONHAND
+        <where>${ew.sqlSegment}</where>
+        group by bom_id,
+        num,
+        base_num,
+        b_material_id,
+        b_material_code,
+        b_material_name,
+        b_material_spec,
+        material_id,
+        material_code,
+        material_name,
+        version
+        order by b_material_code
+    </select>
+</mapper>

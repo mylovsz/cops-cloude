@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cops.nc65.dao.BatchMaterialDao">
+    <select id="getBatchMaterials" resultType="com.cops.entity.nc65.BatchMaterial">
+        SELECT
+        oo_orgs.code orgs_code,
+        imb_material.vfirstbillcode pmo_bill_code,
+        bm_material.code material_code,
+        bm_material.name material_name,
+        bm_material.materialspec material_spec,
+        imb_material.dbizdate biz_date,
+        imb_material.dproducedate produce_date,
+        imb_material.nassistnum assist_num,
+        sb_batchcode.vbatchcode batch_code,
+        bs_supplier.name supplier_name,
+        bs_stordoc.name stordoc_name,
+        br_rack.innercode inner_code,
+        br_rack.name rack_name
+        FROM
+        nc65.ic_material_b imb_material
+        LEFT JOIN nc65.bd_material bm_material ON imb_material.cmaterialvid = bm_material.pk_material
+        LEFT JOIN nc65.scm_batchcode sb_batchcode ON imb_material.pk_batchcode = sb_batchcode.pk_batchcode
+        LEFT JOIN nc65.bd_stordoc bs_stordoc ON imb_material.cbodywarehouseid = bs_stordoc.pk_stordoc
+        LEFT JOIN nc65.bd_rack br_rack ON imb_material.clocationid = br_rack.pk_rack
+        LEFT JOIN nc65.bd_supplier bs_supplier ON bs_supplier.code = substr( sb_batchcode.vbatchcode, 1, 8 )
+        LEFT JOIN nc65.org_orgs oo_orgs ON bs_supplier.pk_org = oo_orgs.pk_org
+        <where>${ew.sqlSegment}</where>
+        ORDER BY
+        bm_material.code ASC
+    </select>
+    <select id="getPage" resultType="com.cops.entity.nc65.BatchMaterial">
+        SELECT
+        oo_orgs.code orgs_code,
+        imb_material.vfirstbillcode pmo_bill_code,
+        bm_material.code material_code,
+        bm_material.name material_name,
+        bm_material.materialspec material_spec,
+        imb_material.dbizdate biz_date,
+        imb_material.dproducedate produce_date,
+        imb_material.nassistnum assist_num,
+        sb_batchcode.vbatchcode batch_code,
+        bs_supplier.name supplier_name,
+        bs_stordoc.name stordoc_name,
+        br_rack.innercode inner_code,
+        br_rack.name rack_name
+        FROM
+        nc65.ic_material_b imb_material
+        LEFT JOIN nc65.bd_material bm_material ON imb_material.cmaterialvid = bm_material.pk_material
+        LEFT JOIN nc65.scm_batchcode sb_batchcode ON imb_material.pk_batchcode = sb_batchcode.pk_batchcode
+        LEFT JOIN nc65.bd_stordoc bs_stordoc ON imb_material.cbodywarehouseid = bs_stordoc.pk_stordoc
+        LEFT JOIN nc65.bd_rack br_rack ON imb_material.clocationid = br_rack.pk_rack
+        LEFT JOIN nc65.bd_supplier bs_supplier ON bs_supplier.code = substr( sb_batchcode.vbatchcode, 1, 8 )
+        LEFT JOIN nc65.org_orgs oo_orgs ON bs_supplier.pk_org = oo_orgs.pk_org
+        <where>${ew.sqlSegment}</where>
+        ORDER BY
+        bm_material.code ASC
+    </select>
+</mapper>

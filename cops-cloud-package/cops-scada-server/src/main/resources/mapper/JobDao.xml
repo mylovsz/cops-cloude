@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cops.scada.dao.JobDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.cops.scada.entity.Job">
+    <result column="id" property="id" />
+    <result column="create_date" property="createDate" />
+    <result column="create_by" property="createBy" />
+    <result column="update_date" property="updateDate" />
+    <result column="update_by" property="updateBy" />
+    <result column="remarks" property="remarks" />
+    <result column="del_flag" property="delFlag" />
+        <result column="product_id" property="productId" />
+        <result column="plan_id" property="planId" />
+        <result column="identity_type" property="identityType" />
+        <result column="type" property="type" />
+        <result column="sn" property="sn" />
+        <result column="name" property="name" />
+        <result column="requirement" property="requirement" />
+        <result column="subsidiary_time" property="subsidiaryTime" />
+        <result column="process_time" property="processTime" />
+        <result column="work_time" property="workTime" />
+        <result column="price" property="price" />
+        <result column="introduction" property="introduction" />
+        <result column="sop_attachment" property="sopAttachment" />
+        <result column="sop_name" property="sopName" />
+        <result column="program_attachment" property="programAttachment" />
+        <result column="program_name" property="programName" />
+        <result column="other_attachment" property="otherAttachment" />
+        <result column="other_name" property="otherName" />
+        <result column="version" property="version" />
+        <result column="state" property="state" />
+    </resultMap>
+    <select id="getJobVOByPlanIdAJobSN" resultType="com.cops.scada.entity.VO.JobVO">
+        select plan.sn plan_sn, plan.type planType, plan.rule planRule, product.sn product_sn ,job.*
+        from
+        scada_job job
+        left join scada_plan plan on job.plan_id = plan.id
+        left join scada_product product on plan.product_id = product.id
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+    <select id="getPageJobVO" resultType="com.cops.scada.entity.VO.JobVO">
+        select plan.sn plan_sn, product.sn product_sn ,job.*
+        from
+        scada_job job
+        left join scada_plan plan on job.plan_id = plan.id
+        left join scada_product product on plan.product_id = product.id
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+
+    <select id="getJobByProductId" resultType="com.cops.scada.entity.Job">
+        select *
+        from
+        scada_job job
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+</mapper>

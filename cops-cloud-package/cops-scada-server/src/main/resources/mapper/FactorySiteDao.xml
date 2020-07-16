@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cops.scada.dao.FactorySiteDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.cops.scada.entity.FactorySite">
+        <result column="id" property="id"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="parent_ids" property="parentIds"/>
+        <result column="level" property="level"/>
+        <result column="sort" property="sort"/>
+        <result column="create_date" property="createDate"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_date" property="updateDate"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="remarks" property="remarks"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="sn" property="sn"/>
+        <result column="name" property="name"/>
+        <result column="type" property="type"/>
+        <result column="description" property="description"/>
+        <result column="href" property="href"/>
+        <result column="logo" property="logo"/>
+    </resultMap>
+
+    <!-- 递归查询 -->
+    <resultMap id="getSelf" type="com.cops.scada.entity.FactorySite">
+        <result column="id" property="id"/>
+        <result column="parentId" property="parentId"/>
+        <result column="parentIds" property="parentIds"/>
+        <result column="level" property="level"/>
+        <result column="sort" property="sort"/>
+        <result column="createDate" property="createDate"/>
+        <result column="createBy" property="createBy"/>
+        <result column="updateDate" property="updateDate"/>
+        <result column="updateBy" property="updateBy"/>
+        <result column="remarks" property="remarks"/>
+        <result column="delFlag" property="delFlag"/>
+        <result column="sn" property="sn"/>
+        <result column="name" property="name"/>
+        <result column="type" property="type"/>
+        <result column="description" property="description"/>
+        <result column="href" property="href"/>
+        <result column="logo" property="logo"/>
+        <collection property="children" select="getListForTree" column="{parentId = id}"></collection>
+    </resultMap>
+
+    <select id="getListForTree" resultMap="getSelf" parameterType="java.util.Map">
+        select id, parent_id "parentId", parent_ids "parentIds", level, sort, create_date "createDate", create_by "createId",
+            update_date "updateDate", update_by "updateId", remarks, del_flag "delFlag", sn, name, type, description, href, logo
+        from scada_factory_site
+        where del_flag = false
+        <choose>
+            <when test="parentId != null and parentId!='' ">
+                and parent_id = #{parentId}
+            </when>
+            <otherwise>
+                and parent_id is NULL
+            </otherwise>
+        </choose>
+        order by sort asc
+    </select>
+
+</mapper>

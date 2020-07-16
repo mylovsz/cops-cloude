@@ -1,0 +1,40 @@
+server:
+  port: 8801
+
+spring:
+  application:
+    name: cops-nc65-server
+  profiles:
+    active: dev_mac
+  # 测试使用，后期都会搬移到SVN上面
+  datasource:
+    url: jdbc:oracle:thin:@192.168.1.240:1521:NCTEST
+    username: nc65
+    password: Lumlux123
+    driver-class-name: oracle.jdbc.OracleDriver
+#mybatisPlus
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.cops.nc65.entity
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  #实体扫描，多个package用逗号或者分号隔离
+  typeAliasesPackage: com.cops.nc65.entity
+
+#日志
+logging:
+  config: classpath:log/logback.xml
+  path: /Volumes/Me/path/cops_nc65/log
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    lease-expiration-duration-in-seconds: 10
+    lease-renewal-interval-in-seconds: 5
+
+---
+#开发环境配置
+spring:
+  profiles: dev_mac

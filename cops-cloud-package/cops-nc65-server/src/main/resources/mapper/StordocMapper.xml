@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cops.nc65.dao.StordocDao">
+    <select id="getStordocs" resultType="com.cops.entity.nc65.Stordoc">
+        select
+        stordoc.pk_stordoc stordoc_id,
+        stordoc.code stordoc_code,
+        stordoc.name stordoc_name,
+        oo_orgs.code orgs_code
+        from nc65.bd_stordoc stordoc
+        LEFT JOIN nc65.org_orgs oo_orgs ON stordoc.pk_org = oo_orgs.pk_org
+        <where>${ew.sqlSegment}</where>
+    </select>
+</mapper>

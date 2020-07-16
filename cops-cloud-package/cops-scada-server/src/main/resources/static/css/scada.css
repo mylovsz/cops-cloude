@@ -1,0 +1,28 @@
+/*自定义属性*/
+.scada-result-success{
+    color: #5FB878;
+    font-size: 12px;
+}
+.scada-result-normal{
+    color: #999999;
+    font-size: 12px;
+}
+.scada-result-fail{
+    color: #FFB800;
+    font-size: 12px;
+}
+.childrenBody {
+    margin: 5px 5px 5px 5px;
+    background: #f2f2f2;
+}
+.my-layui-container {
+    border: 1px solid #f2f2f2;
+    border-radius: 5px;
+    background-color: #ffffff}
+
+.my-layui-main {
+    margin: 10px 10px 10px 10px;
+}
+.layui-form .layui-inline{
+    margin-top: 5px;
+}

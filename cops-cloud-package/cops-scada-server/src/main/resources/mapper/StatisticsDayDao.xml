@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cops.scada.dao.StatisticsDayDao">
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.cops.scada.entity.VO.StatisticsDayVO">
+        <result column="value1" property="value1"/>
+        <result column="value2" property="value2"/>
+        <result column="value3" property="value3"/>
+        <result column="value4" property="value4"/>
+        <result column="value5" property="value5"/>
+    </resultMap>
+
+    <!--生产日报相关的数据 站点数据，维修，工单数据-->
+    <select id="getStatisticsDayCollect" parameterType="map" resultType="com.cops.scada.entity.VO.StatisticsDayVO">
+
+        SELECT COUNT(*) value1
+        FROM
+            (SELECT max( collect_date ) temp_date,count( * ) value2 ,result value4
+            FROM ${ sex }
+            WHERE
+            collect_date &gt;= #{t1,jdbcType=DATE}  and  collect_date &lt;= #{t2,jdbcType=DATE}
+            <if test="result!=null">
+                and result != 'PASS'
+            </if>
+            GROUP BY
+            produce_id) AS TAB
+    </select>
+    <select id="getStatisticsDayRepairCollect" resultType="com.cops.scada.entity.VO.StatisticsDayVO">
+        SELECT
+        dict.label value1,
+        COUNT(*) value2
+        FROM
+        scada_repair repair_m
+        LEFT JOIN scada_produce produce ON repair_m.produce_id = produce.id
+        LEFT JOIN scada_plan plan ON produce.plan_id = plan.id
+        LEFT JOIN scada_product product ON plan.product_id = product.id
+        LEFT JOIN sys_dict dict ON repair_m.fault_code = dict.`value`
+        AND dict.type = 'scada_repair_fault_code'
+        LEFT JOIN sys_dict dict1 ON repair_m.responsible_department = dict1.`value`
+        AND dict1.type = 'scada_repair_responsible_department'
+        LEFT JOIN sys_dict dict2 ON repair_m.state = dict2.`value`
+        AND dict2.type = 'scada_repair_state'
+        where  fault_date &gt;= #{t1,jdbcType=DATE}  and  fault_date &lt;= #{t2,jdbcType=DATE}
+        GROUP BY  dict.label
+    </select>
+    <select id="getStatisticsDayPlanCollect" resultType="com.cops.scada.entity.VO.StatisticsDayVO">
+        SELECT
+        product.sn value1,
+        plan.sn value2,
+        plan.quantity value3,
+        dict.label value4,
+        DATE_FORMAT(plan.tag_end_date,'%Y-%m-%d')  value5
+        FROM
+        scada_plan plan
+        LEFT JOIN scada_product product ON product.id=plan.product_id
+        LEFT JOIN sys_dict dict ON dict.`value`= plan.state AND dict.type = 'scada_plan_state'
+        WHERE
+        plan.create_date &gt;= #{t1,jdbcType=DATE}  and  plan.create_date &lt;= #{t2,jdbcType=DATE}
+        ORDER BY  plan.tag_end_date
+    </select>
+</mapper>

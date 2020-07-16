@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cops.scada.dao.PlanQualityDao">
+    <select id="getPlanQualityVO" resultType="com.cops.scada.entity.VO.PlanQualityVO">
+        SELECT
+        plan.tag_end_date tag_end_date,
+        plan.state plan_state,
+        plan.id plan_id,
+        plan.sn plan_sn,
+        product.sn product_sn,
+        plan.quantity plan_quantity,
+        (
+        SELECT
+        count( 1 ) total_count
+        FROM
+        scada_produce pe
+        LEFT JOIN scada_plan pn ON pe.plan_id = pn.id
+        WHERE
+        ( pn.del_flag = 0 AND pe.del_flag = 0 AND plan.id = pe.plan_id )
+        AND pe.state != 0
+        ) AS statistics_running,
+        (
+        SELECT
+        count( 1 ) total_count
+        FROM
+        scada_produce pe
+        LEFT JOIN scada_plan pn ON pe.plan_id = pn.id
+        WHERE
+        ( pn.del_flag = 0 AND pe.del_flag = 0 AND plan.id = pe.plan_id )
+        AND pe.result_g = 1
+        ) AS statistics_package,
+        (
+        SELECT
+        count( 1 ) total_count
+        FROM
+        scada_produce pe
+        LEFT JOIN scada_plan pn ON pe.plan_id = pn.id
+        WHERE
+        ( pn.del_flag = 0 AND pe.del_flag = 0 AND plan.id = pe.plan_id )
+        AND pe.result_f = 1
+        ) AS statistics_final_test,
+        (
+        SELECT
+        count(
+        CASE
+
+        WHEN pe.state = 4
+        OR pe.state = 5
+        OR pe.state = 6
+        OR pe.state = 7 THEN
+        1 ELSE NULL
+        END
+        ) total_count
+        FROM
+        scada_produce pe
+        LEFT JOIN scada_plan pn ON pe.plan_id = pn.id
+        WHERE
+        ( pn.del_flag = 0 AND pe.del_flag = 0 AND plan.id = pe.plan_id )
+        ) AS statistics_error
+        FROM
+        scada_plan plan
+        LEFT JOIN scada_product product ON plan.product_id = product.id
+        <where> ${ ew.sqlSegment } </where>
+    </select>
+</mapper>

@@ -1,0 +1,22 @@
+.mylayui-text-center{
+    overflow: hidden;
+    padding-bottom: 15px;
+}
+.input-label{
+    background-color: transparent;
+    border: 0;
+}
+.textarea-label{
+    resize:none;
+    background-color: transparent;
+    border: 0;
+    padding-top: 8px;
+}
+.select-label{
+    background-color: transparent;
+    border: 0;
+    color: black;
+    appearance:none;
+    -moz-appearance:none;
+    -webkit-appearance:none;
+}

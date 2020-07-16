@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cops.scada.dao.DeviceRepairDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.cops.scada.entity.DeviceRepair">
+    <result column="id" property="id" />
+    <result column="create_date" property="createDate" />
+    <result column="create_by" property="createBy" />
+    <result column="update_date" property="updateDate" />
+    <result column="update_by" property="updateBy" />
+    <result column="remarks" property="remarks" />
+    <result column="del_flag" property="delFlag" />
+        <result column="device_id" property="deviceId" />
+        <result column="fault_appearance" property="faultAppearance" />
+        <result column="fault_date" property="faultDate" />
+        <result column="fault_user_id" property="faultUserId" />
+        <result column="fault_cause" property="faultCause" />
+        <result column="responsible_department" property="responsibleDepartment" />
+        <result column="repair_way" property="repairWay" />
+        <result column="repair_date" property="repairDate" />
+        <result column="repair_user_id" property="repairUserId" />
+        <result column="ensure_user_id" property="ensureUserId" />
+        <result column="ensure_date" property="ensureDate" />
+    </resultMap>
+
+</mapper>

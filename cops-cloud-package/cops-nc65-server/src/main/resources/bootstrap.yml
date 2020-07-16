@@ -1,0 +1,35 @@
+spring:
+  application:
+    name: cops-nc65-server
+  profiles:
+    active: nc65-base
+---
+spring:
+  profiles: nc65-base
+  cloud:
+    config:
+      profile: dev
+      #/{label}/{application}-{profile}.yml
+      #label: mac
+      #uri: http://localhost:8762
+      discovery:
+        enabled: true
+        service-id: cops-config-server
+---
+spring:
+  profiles: docker-nc65
+  cloud:
+    config:
+      profile: dev-docker
+      #/{label}/{application}-{profile}.yml
+      #label: mac
+      uri: http://docker-config:8762
+---
+spring:
+  profiles: win-bat
+  cloud:
+    config:
+      profile: win
+      #/{label}/{application}-{profile}.yml
+      #label: mac
+      uri: http://localhost:8762

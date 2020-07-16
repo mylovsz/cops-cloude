@@ -1,0 +1,494 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cops.scada.dao.ExaminesADao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.cops.scada.entity.ExaminesA">
+        <result column="id" property="id"/>
+        <result column="create_date" property="createDate"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_date" property="updateDate"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="remarks" property="remarks"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="produce_id" property="produceId"/>
+        <result column="type" property="type"/>
+        <result column="meter_a" property="meterA"/>
+        <result column="meter_b" property="meterB"/>
+        <result column="meter_c" property="meterC"/>
+        <result column="meter_d" property="meterD"/>
+        <result column="meter_e" property="meterE"/>
+        <result column="meter_f" property="meterF"/>
+        <result column="meter_g" property="meterG"/>
+        <result column="meter_h" property="meterH"/>
+        <result column="meter_i" property="meterI"/>
+        <result column="meter_j" property="meterJ"/>
+        <result column="meter_k" property="meterK"/>
+        <result column="meter_l" property="meterL"/>
+        <result column="meter_m" property="meterM"/>
+        <result column="meter_n" property="meterN"/>
+        <result column="meter_o" property="meterO"/>
+        <result column="meter_p" property="meterP"/>
+        <result column="meter_q" property="meterQ"/>
+        <result column="meter_r" property="meterR"/>
+        <result column="meter_s" property="meterS"/>
+        <result column="meter_t" property="meterT"/>
+        <result column="collect_date" property="collectDate"/>
+        <result column="result" property="result"/>
+    </resultMap>
+    <delete id="deleteDup">
+        DELETE
+        FROM
+            scada_examines_a
+        WHERE
+            id NOT IN (
+                SELECT
+                    dt.minno
+                FROM
+                    (
+                        SELECT
+                            MAX(id) AS minno
+                        FROM
+                            scada_examines_a
+                        GROUP BY
+                            produce_id, meter_a, meter_b, result
+                    ) dt
+            )
+    </delete>
+    <select id="getExaminesAVO" resultType="com.cops.scada.entity.VO.ExaminesAVO">
+        SELECT
+        product.sn productSN,
+        produce.sn produceSN,
+        examines_a.*
+        FROM
+        scada_examines_a examines_a
+        LEFT JOIN scada_produce produce ON examines_a.produce_id = produce.id
+        LEFT JOIN scada_plan plan ON plan.id = produce.plan_id
+        LEFT JOIN scada_product product ON product.id = plan.product_id
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+    <select id="getAllExaminesAVO" resultType="com.cops.scada.entity.VO.ExaminesAVO">
+        SELECT
+        product.sn productSN,
+        produce.sn produceSN,
+        examines_a.*
+        FROM
+        scada_examines_a examines_a
+        LEFT JOIN scada_produce produce ON examines_a.produce_id = produce.id
+        LEFT JOIN scada_plan plan ON plan.id = produce.plan_id
+        LEFT JOIN scada_product product ON product.id = plan.product_id
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+    <select id="getStatisticsExaminesCollect" resultType="com.cops.scada.entity.VO.StatisticsExaminesCollect">
+        SELECT
+        date( temp.temp_date ) collect_date,
+        count( * ) collect_count
+        FROM
+        ( SELECT produce_id temp_id, max( collect_date ) temp_date, count( * ) temp_count FROM scada_examines_a
+        <where>
+            ${ew.sqlSegment}
+        </where>
+        GROUP BY produce_id, date_format(collect_date, '%Y%m%d') ) AS temp
+        GROUP BY
+        date( temp.temp_date )
+    </select>
+    <select id="getQulityDay" resultType="com.cops.scada.entity.VO.QualityExaminesVO">
+        SELECT
+            examines.collect_date_t collect_date,
+            examines.plan_sn,
+            examines.product_sn,
+            count( examines.id ) tocal_count,
+            (
+            SELECT
+                count( examines_produce_count.produce_sn )
+            FROM
+                (
+                SELECT
+                    examines.plan_sn,
+                    examines.produce_sn,
+                    count( examines.id )
+                FROM
+                    (
+                    SELECT
+                        plan.sn plan_sn,
+                        produce.sn produce_sn,
+                        examines_a.*
+                    FROM
+                        ( SELECT * FROM scada_examines_a WHERE date( collect_date ) = #{collectDate} ) examines_a
+                        LEFT JOIN scada_produce produce ON examines_a.produce_id = produce.id
+                        LEFT JOIN scada_plan plan ON produce.plan_id = plan.id
+                    ) examines
+                GROUP BY
+                    examines.produce_sn, examines.plan_sn
+                ) examines_produce_count
+            WHERE
+                examines_produce_count.plan_sn = examines.plan_sn
+            ) produce_count,
+            (
+            SELECT
+                count( examines_produce_count.produce_sn )
+            FROM
+                (
+                SELECT
+                    examines.plan_sn,
+                    examines.produce_sn,
+                    count( examines.id )
+                FROM
+                    (
+                    SELECT
+                        plan.sn plan_sn,
+                        produce.sn produce_sn,
+                        examines_a.*
+                    FROM
+                        ( SELECT * FROM scada_examines_a WHERE date( collect_date ) = #{collectDate} and (result is null or result != 'PASS') ) examines_a
+                        LEFT JOIN scada_produce produce ON examines_a.produce_id = produce.id
+                        LEFT JOIN scada_plan plan ON produce.plan_id = plan.id
+                    ) examines
+                GROUP BY
+                    examines.produce_sn, examines.plan_sn
+                ) examines_produce_count
+            WHERE
+                examines_produce_count.plan_sn = examines.plan_sn
+            ) produce_error
+        FROM
+            (
+            SELECT
+                plan.sn plan_sn,
+                produce.sn produce_sn,
+                product.sn product_sn,
+                date( examines_a.collect_date ) collect_date_t,
+                examines_a.*
+            FROM
+                ( SELECT * FROM scada_examines_a WHERE date( collect_date ) = #{collectDate} ) examines_a
+                LEFT JOIN scada_produce produce ON examines_a.produce_id = produce.id
+                LEFT JOIN scada_plan plan ON produce.plan_id = plan.id
+                left join scada_product product on plan.product_id = product.id
+            ) examines
+        GROUP BY
+            examines.plan_sn, examines.product_sn, examines.collect_date_t
+    </select>
+
+    <select id="getQulityDay1" resultType="com.cops.scada.entity.VO.QualityExaminesVO">
+        SELECT
+            examines.collect_date_t collect_date,
+            examines.plan_sn,
+            examines.product_sn,
+            count( examines.id ) tocal_count,
+            (
+            SELECT
+                count( examines_produce_count.produce_sn )
+            FROM
+                (
+                SELECT
+                    examines.plan_sn,
+                    examines.produce_sn,
+                    count( examines.id )
+                FROM
+                    (
+                    SELECT
+                        plan.sn plan_sn,
+                        produce.sn produce_sn,
+                        examines_a.*
+                    FROM
+                        ( SELECT * FROM scada_examines_a WHERE (`collect_date` BETWEEN #{start} AND #{end}) ) examines_a
+                        LEFT JOIN scada_produce produce ON examines_a.produce_id = produce.id
+                        LEFT JOIN scada_plan plan ON produce.plan_id = plan.id
+                    ) examines
+                GROUP BY
+                    examines.produce_sn, examines.plan_sn
+                ) examines_produce_count
+            WHERE
+                examines_produce_count.plan_sn = examines.plan_sn
+            ) produce_count,
+            (
+            SELECT
+                count( examines_produce_count.produce_sn )
+            FROM
+                (
+                SELECT
+                    examines.plan_sn,
+                    examines.produce_sn,
+                    count( examines.id )
+                FROM
+                    (
+                    SELECT
+                        plan.sn plan_sn,
+                        produce.sn produce_sn,
+                        examines_a.*
+                    FROM
+                        ( SELECT * FROM scada_examines_a WHERE (`collect_date` BETWEEN #{start} AND #{end}) and (result is null or result != 'PASS') ) examines_a
+                        LEFT JOIN scada_produce produce ON examines_a.produce_id = produce.id
+                        LEFT JOIN scada_plan plan ON produce.plan_id = plan.id
+                    ) examines
+                GROUP BY
+                    examines.produce_sn, examines.plan_sn
+                ) examines_produce_count
+            WHERE
+                examines_produce_count.plan_sn = examines.plan_sn
+            ) produce_error
+        FROM
+            (
+            SELECT
+                plan.sn plan_sn,
+                produce.sn produce_sn,
+                product.sn product_sn,
+                date( examines_a.collect_date ) collect_date_t,
+                examines_a.*
+            FROM
+                ( SELECT * FROM scada_examines_a WHERE (`collect_date` BETWEEN #{start} AND #{end}) ) examines_a
+                LEFT JOIN scada_produce produce ON examines_a.produce_id = produce.id
+                LEFT JOIN scada_plan plan ON produce.plan_id = plan.id
+                left join scada_product product on plan.product_id = product.id
+            ) examines
+        GROUP BY
+            examines.plan_sn, examines.product_sn, examines.collect_date_t
+    </select>
+
+    <select id="getQulityDay3" resultType="com.cops.scada.entity.VO.QualityExaminesVO">
+        SELECT
+        *
+        FROM
+            (
+        SELECT
+        date( examines.collect_date ) collect_date,
+        examines.plan_sn,
+        examines.product_sn,
+        count( examines.id ) tocal_count,
+        (
+        SELECT
+        count( examines_produce_count.produce_sn )
+        FROM
+        (
+        SELECT
+        examines.plan_sn,
+        examines.produce_sn,
+        count( examines.id )
+        FROM
+        (
+        SELECT
+        plan.sn plan_sn,
+        produce.sn produce_sn,
+        examines_a.*
+        FROM
+        ( SELECT * FROM scada_examines_a WHERE (`collect_date` BETWEEN #{start} AND #{end}) ) examines_a
+        LEFT JOIN scada_produce produce ON examines_a.produce_id = produce.id
+        LEFT JOIN scada_plan plan ON produce.plan_id = plan.id
+        ) examines
+        GROUP BY
+        examines.produce_sn
+        ) examines_produce_count
+        WHERE
+        examines_produce_count.plan_sn = examines.plan_sn
+        ) produce_count,
+        (
+        SELECT
+        count( examines_produce_count.produce_sn )
+        FROM
+        (
+        SELECT
+        examines.plan_sn,
+        examines.produce_sn,
+        count( examines.id )
+        FROM
+        (
+        SELECT
+        plan.sn plan_sn,
+        produce.sn produce_sn,
+        examines_a.*
+        FROM
+        ( SELECT * FROM scada_examines_a WHERE (`collect_date` BETWEEN #{start} AND #{end}) and (result is null or result != 'PASS') ) examines_a
+        LEFT JOIN scada_produce produce ON examines_a.produce_id = produce.id
+        LEFT JOIN scada_plan plan ON produce.plan_id = plan.id
+        ) examines
+        GROUP BY
+        examines.produce_sn
+        ) examines_produce_count
+        WHERE
+        examines_produce_count.plan_sn = examines.plan_sn
+        ) produce_error
+        FROM
+        (
+        SELECT
+        plan.sn plan_sn,
+        produce.sn produce_sn,
+        product.sn product_sn,
+        examines_a.*
+        FROM
+        ( SELECT * FROM scada_examines_a WHERE (`collect_date` BETWEEN #{start} AND #{end}) ) examines_a
+        LEFT JOIN scada_produce produce ON examines_a.produce_id = produce.id
+        LEFT JOIN scada_plan plan ON produce.plan_id = plan.id
+        left join scada_product product on plan.product_id = product.id
+        ) examines
+        GROUP BY
+        examines.plan_sn
+            ) qualityExaminesVO
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+
+    <select id="getExaminesTestTime" resultType="com.cops.scada.entity.VO.ExaminesTestTime">
+        SELECT
+        table1.num - 1 id,
+        table1.*,
+        TIMESTAMPDIFF( SECOND, table1.collect_date, table2.collect_date ) test_time
+        FROM
+        (
+        SELECT
+        ( @i := @i + 1 ) AS num,
+        temp1.*
+        FROM
+        (
+        SELECT
+        product.sn product_sn,
+        plan.sn plan_sn,
+        produce.sn produce_sn,
+        examines.collect_date
+        FROM
+        scada_examines_a examines
+        LEFT JOIN scada_produce produce ON examines.produce_id = produce.id
+        LEFT JOIN scada_plan plan ON produce.plan_id = plan.id
+        LEFT JOIN scada_product product ON plan.product_id = product.id
+        <where>
+            ${ew.sqlSegment}
+        </where>
+        GROUP BY
+        produce_id
+        ORDER BY
+        collect_date
+        ) temp1,
+        ( SELECT @i := 1 ) b
+        ) table1
+        LEFT JOIN (
+        SELECT
+        ( @j := @j + 1 ) AS num,
+        temp2.*
+        FROM
+        (
+        SELECT
+        product.sn product_sn,
+        plan.sn plan_sn,
+        produce.sn produce_sn,
+        examines.collect_date
+        FROM
+        scada_examines_a examines
+        LEFT JOIN scada_produce produce ON examines.produce_id = produce.id
+        LEFT JOIN scada_plan plan ON produce.plan_id = plan.id
+        LEFT JOIN scada_product product ON plan.product_id = product.id
+        <where>
+            ${ew.sqlSegment}
+        </where>
+        GROUP BY
+        produce_id
+        ORDER BY
+        collect_date
+        ) temp2,
+        ( SELECT @j := 0 ) d
+        ) table2 ON table1.num = table2.num
+    </select>
+
+
+    <select id="getAllExaminesAVOToExcal" resultType="com.cops.scada.entity.VO.ExaminesAVO">
+        SELECT
+        product.sn productSN,
+        produce.sn produceSN,
+        examines_a.*
+        FROM
+        scada_examines_a examines_a
+        LEFT JOIN scada_produce produce ON examines_a.produce_id = produce.id
+        LEFT JOIN scada_plan plan ON plan.id = produce.plan_id
+        LEFT JOIN scada_product product ON product.id = plan.product_id
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+    <select id="getExaminesAOne" resultType="com.cops.scada.entity.ExaminesA">
+        SELECT
+        *
+        FROM
+        scada_examines_a
+        <where>
+            ${ew.sqlSegment}
+        </where>
+        LIMIT 1
+    </select>
+    <select id="getQulityDayKanban" resultType="com.cops.scada.entity.VO.QualityExaminesVO">
+        SELECT
+            examines.collect_date_t collect_date,
+            examines.plan_sn,
+            examines.product_sn,
+            count( examines.id ) tocal_count,
+            (
+            SELECT
+                count( examines_produce_count.produce_sn )
+            FROM
+                (
+                SELECT
+                    examines.plan_sn,
+                    examines.produce_sn,
+                    count( examines.id )
+                FROM
+                    (
+                    SELECT
+                        plan.sn plan_sn,
+                        produce.sn produce_sn,
+                        examines_a.*
+                    FROM
+                        ( SELECT * FROM scada_examines_a WHERE (`collect_date` BETWEEN #{start} AND #{end}) ) examines_a
+                        LEFT JOIN scada_produce produce ON examines_a.produce_id = produce.id
+                        LEFT JOIN scada_plan plan ON produce.plan_id = plan.id
+                    ) examines
+                GROUP BY
+                    examines.produce_sn, examines.plan_sn
+                ) examines_produce_count
+            WHERE
+                examines_produce_count.plan_sn = examines.plan_sn
+            ) produce_count,
+            (
+            SELECT
+                count( examines_produce_count.produce_sn )
+            FROM
+                (
+                SELECT
+                    examines.plan_sn,
+                    examines.produce_sn,
+                    count( examines.id )
+                FROM
+                    (
+                    SELECT
+                        plan.sn plan_sn,
+                        produce.sn produce_sn,
+                        examines_a.*
+                    FROM
+                        ( SELECT * FROM scada_examines_a WHERE (`collect_date` BETWEEN #{start} AND #{end}) and (result is null or result != 'PASS') ) examines_a
+                        LEFT JOIN scada_produce produce ON examines_a.produce_id = produce.id
+                        LEFT JOIN scada_plan plan ON produce.plan_id = plan.id
+                    ) examines
+                GROUP BY
+                    examines.produce_sn, examines.plan_sn
+                ) examines_produce_count
+            WHERE
+                examines_produce_count.plan_sn = examines.plan_sn
+            ) produce_error
+        FROM
+            (
+            SELECT
+                plan.sn plan_sn,
+                produce.sn produce_sn,
+                product.sn product_sn,
+                date( examines_a.collect_date ) collect_date_t,
+                examines_a.*
+            FROM
+                ( SELECT * FROM scada_examines_a WHERE (`collect_date` BETWEEN #{start} AND #{end}) ) examines_a
+                LEFT JOIN scada_produce produce ON examines_a.produce_id = produce.id
+                LEFT JOIN scada_plan plan ON produce.plan_id = plan.id
+                left join scada_product product on plan.product_id = product.id
+            ) examines
+        GROUP BY
+            examines.plan_sn, examines.product_sn, examines.collect_date_t
+    </select>
+</mapper>

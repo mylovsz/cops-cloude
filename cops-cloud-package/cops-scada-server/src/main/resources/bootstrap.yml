@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: cops-scada-server
+  profiles:
+    active: scada-base
+---
+spring:
+  profiles: scada-base
+  cloud:
+    config:
+      # 自动在svn中扫描路径模板：/{label}/{application}-{profile}.yml
+      # dev 开发模式
+#      profile: win
+      profile: win
+      # mac/win
+      #label: mac
+      #uri: http://localhost:8762
+      discovery:
+        enabled: true
+        service-id: cops-config-server
+---
+spring:
+  profiles: docker-scada
+  cloud:
+    config:
+      # 自动在svn中扫描路径模板：/{label}/{application}-{profile}.yml
+      # dev 开发模式
+      profile: dev-docker
+      uri: http://docker-config:8762
+---
+spring:
+  profiles: win-bat
+  cloud:
+    config:
+      # 自动在svn中扫描路径模板：/{label}/{application}-{profile}.yml
+      # dev 开发模式
+      profile: win
+      uri: http://localhost:8762

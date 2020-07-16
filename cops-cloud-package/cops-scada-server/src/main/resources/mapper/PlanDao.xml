@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cops.scada.dao.PlanDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.cops.scada.entity.Plan">
+    <result column="id" property="id" />
+    <result column="create_date" property="createDate" />
+    <result column="create_by" property="createBy" />
+    <result column="update_date" property="updateDate" />
+    <result column="update_by" property="updateBy" />
+    <result column="remarks" property="remarks" />
+    <result column="del_flag" property="delFlag" />
+        <result column="sn" property="sn" />
+        <result column="nc65_id" property="nc65Id" />
+        <result column="product_id" property="productId" />
+        <result column="quantity" property="quantity" />
+        <result column="lable_range" property="lableRange" />
+        <result column="start_date" property="startDate" />
+        <result column="end_date" property="endDate" />
+        <result column="tag_start_date" property="tagStartDate" />
+        <result column="tag_end_date" property="tagEndDate" />
+        <result column="state" property="state" />
+    </resultMap>
+    <select id="getPlanProduct" resultType="com.cops.scada.entity.VO.PlanProductVO">
+        select plan.*, product.name productName, product.sn product_sn
+        from scada_plan plan
+        left join scada_product product on plan.product_id = product.id
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+    <select id="getStatisticsPlanVO" resultType="com.cops.scada.entity.VO.StatisticsPlanVO">
+        select count(*) total_count, sum(quantity) total_quantity from scada_plan
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+    <select id="exists" resultType="java.lang.Boolean">
+        select ifnull((select 1 from scada_plan
+        <where>
+            ${ew.sqlSegment}
+        </where>
+        limit 1), 0)
+    </select>
+    <select id="getPlanQualityDetailVO" resultType="com.cops.scada.entity.VO.PlanQualityDetailVO">
+SELECT
+	( SELECT count( * ) FROM scada_produce WHERE plan_id = #{planId} ) total_count,
+	( SELECT count( * ) FROM scada_produce WHERE plan_id = #{planId} and result_a = 0) ready_a_count,
+	( SELECT count( * ) FROM scada_produce WHERE plan_id = #{planId} and result_a = 1) pass_a_count,
+	( SELECT count( * ) FROM scada_produce WHERE plan_id = #{planId} and result_a = 2) error_a_count,
+	( SELECT count( * ) FROM scada_produce WHERE plan_id = #{planId} and result_b = 0) ready_b_count,
+	( SELECT count( * ) FROM scada_produce WHERE plan_id = #{planId} and result_b = 1) pass_b_count,
+	( SELECT count( * ) FROM scada_produce WHERE plan_id = #{planId} and result_b = 2) error_b_count,
+	( SELECT count( * ) FROM scada_produce WHERE plan_id = #{planId} and result_c = 0) ready_c_count,
+	( SELECT count( * ) FROM scada_produce WHERE plan_id = #{planId} and result_c = 1) pass_c_count,
+	( SELECT count( * ) FROM scada_produce WHERE plan_id = #{planId} and result_c = 2) error_c_count,
+	( SELECT count( * ) FROM scada_produce WHERE plan_id = #{planId} and result_d = 0) ready_d_count,
+	( SELECT count( * ) FROM scada_produce WHERE plan_id = #{planId} and result_d = 1) pass_d_count,
+	( SELECT count( * ) FROM scada_produce WHERE plan_id = #{planId} and result_d = 2) error_d_count,
+	( SELECT count( * ) FROM scada_produce WHERE plan_id = #{planId} and result_e = 0) ready_e_count,
+	( SELECT count( * ) FROM scada_produce WHERE plan_id = #{planId} and result_e = 1) pass_e_count,
+	( SELECT count( * ) FROM scada_produce WHERE plan_id = #{planId} and result_e = 2) error_e_count,
+	( SELECT count( * ) FROM scada_produce WHERE plan_id = #{planId} and result_f = 0) ready_f_count,
+	( SELECT count( * ) FROM scada_produce WHERE plan_id = #{planId} and result_f = 1) pass_f_count,
+	( SELECT count( * ) FROM scada_produce WHERE plan_id = #{planId} and result_f = 2) error_f_count,
+	( SELECT count( * ) FROM scada_produce WHERE plan_id = #{planId} and result_g = 0) ready_g_count,
+	( SELECT count( * ) FROM scada_produce WHERE plan_id = #{planId} and result_g = 1) pass_g_count,
+	( SELECT count( * ) FROM scada_produce WHERE plan_id = #{planId} and result_g = 2) error_g_count
+    </select>
+    <select id="getStatisticsPlanVOAndProduct" resultType="com.cops.scada.entity.VO.StatisticsPlanVO">
+        select count(*) total_count, sum(quantity) total_quantity from scada_plan plan
+        left join scada_product product on plan.product_id = product.id
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+
+</mapper>

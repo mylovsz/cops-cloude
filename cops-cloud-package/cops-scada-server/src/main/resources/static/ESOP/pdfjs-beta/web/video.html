@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>操作视频学习</title> 
+    <script src="jquery-3.3.1/jquery-3.3.1.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#File").change(function (file) {
+                $("body").append(file.target.files[0]);
+                var url = window.URL.createObjectURL(file.target.files[0]);
+                $("#player")[0].src = url;
+                $("#player")[0].onload = function () {
+                    window.URL.revokeObjectURL(src);
+                };
+                // $("#player").css({ "height": "100%" });
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <input id="File" type="file" id="file" style="display:flex;margin-top: -20px;" />
+    <video id="player" width="480px" height="320px"  controls="controls" autoplay="autoplay" loop="loop" style="display:flex;">您的浏览器不支持 HTML5 video 标签。</video>
+</body>
+
+</html>

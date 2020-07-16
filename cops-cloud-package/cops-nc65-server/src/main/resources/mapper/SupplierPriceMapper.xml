@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cops.nc65.dao.SupplierPriceDao">
+
+    <select id="getSupplierPrice" resultType="com.cops.entity.nc65.SupplierPrice">
+    SELECT
+        material.pk_material material_id,
+        material.code material_code,
+        material.name material_name,
+        currtype.currtypesign currtype_currtypesign,
+        supplierprice.ntaxrate tax_rate,
+        supplierprice.norigprice orig_price,
+        supplierprice.norigtaxprice orig_tax_price,
+        supplierprice.dvaliddate valid_date,
+        supplierprice.dinvaliddate invalid_date
+    FROM
+        bd_material material
+        LEFT JOIN purp_supplierprice supplierprice ON material.pk_material = supplierprice.pk_material
+        LEFT JOIN bd_currtype currtype ON supplierprice.corigcurrencyid = currtype.pk_currtype
+    <where>${ew.sqlSegment}</where>
+    </select>
+</mapper>

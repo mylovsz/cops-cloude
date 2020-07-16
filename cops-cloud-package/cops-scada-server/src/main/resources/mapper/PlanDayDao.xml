@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cops.scada.dao.PlanDayDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.cops.scada.entity.PlanDay">
+    <result column="id" property="id" />
+    <result column="create_date" property="createDate" />
+    <result column="create_by" property="createBy" />
+    <result column="update_date" property="updateDate" />
+    <result column="update_by" property="updateBy" />
+    <result column="remarks" property="remarks" />
+    <result column="del_flag" property="delFlag" />
+        <result column="plan_id" property="planId" />
+        <result column="plan_num" property="planNum" />
+        <result column="num" property="num" />
+        <result column="num_success" property="numSuccess" />
+        <result column="num_finish" property="numFinish" />
+        <result column="num_scrap" property="numScrap" />
+        <result column="num_repair" property="numRepair" />
+        <result column="manufacture_date" property="manufactureDate" />
+        <result column="manufacture_num" property="manufactureNum" />
+        <result column="manufacture_staffs" property="manufactureStaffs" />
+        <result column="work_time" property="workTime" />
+        <result column="work_overtime" property="workOvertime" />
+        <result column="work_errortime" property="workErrortime" />
+        <result column="tag_quality" property="tagQuality" />
+        <result column="manufacture_times" property="manufactureTimes" />
+        <result column="job_id" property="jobId" />
+    </resultMap>
+    <select id="getPlanDayVO" resultType="com.cops.scada.entity.VO.PlanDayVO">
+        SELECT
+        job.sn job_sn,
+        job.NAME job_name,
+        job.identity_type job_identity_type,
+        job.type job_type,
+        ifnull(master_plan.sn, plan.sn) master_plan_sn,
+        ifnull(master_plan.nc_id, plan.nc_id) master_plan_nc_id,
+        ifnull(master_product.sn, product.sn) master_product_sn,
+        ifnull(master_product.name, product.name) master_product_name,
+        plan.sn plan_sn,
+        plan.quantity plan_quantity,
+        product.sn product_sn,
+        product.name product_name,
+        plan_day.*
+        FROM
+        scada_plan_day plan_day
+        LEFT JOIN scada_job job ON plan_day.job_id = job.id
+        LEFT JOIN scada_plan plan ON plan_day.plan_id = plan.id
+        left join scada_plan_link plan_link on plan_link.slave_plan_id = plan.id
+        left join scada_plan master_plan on master_plan.id = plan_link.master_plan_id
+        left join scada_product master_product on master_plan.product_id = master_product.id
+        left join scada_product product on plan.product_id = product.id
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+    <select id="getPagePlanDayVO" resultType="com.cops.scada.entity.VO.PlanDayVO">
+        SELECT
+        job.id job_id,
+        job.sn job_sn,
+        job.NAME job_name,
+        job.identity_type job_identity_type,
+        job.type job_type,
+        ifnull(master_plan.sn, plan.sn) master_plan_sn,
+        ifnull(master_plan.nc_id, plan.nc_id) master_plan_nc_id,
+        ifnull(master_product.sn, product.sn) master_product_sn,
+        ifnull(master_product.name, product.name) master_product_name,
+        plan.id plan_id,
+        plan.sn plan_sn,
+        plan.nc_id plan_nc_id,
+        plan.type plan_type,
+        plan.rule plan_rule,
+        plan.quantity plan_quantity,
+        product.sn product_sn,
+        product.name product_name,
+        plan_day.*
+        FROM
+        scada_plan_day plan_day
+        LEFT JOIN scada_job job ON plan_day.job_id = job.id
+        LEFT JOIN scada_plan plan ON plan_day.plan_id = plan.id
+        left join scada_plan_link plan_link on plan_link.slave_plan_id = plan.id
+        left join scada_plan master_plan on master_plan.id = plan_link.master_plan_id
+        left join scada_product master_product on master_plan.product_id = master_product.id
+        left join scada_product product on plan.product_id = product.id
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+    <select id="getPlanDayForMakeNum" resultType="java.lang.Integer">
+        SELECT
+        sum(manufacture_num)
+        FROM
+        scada_plan_day
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+
+</mapper>

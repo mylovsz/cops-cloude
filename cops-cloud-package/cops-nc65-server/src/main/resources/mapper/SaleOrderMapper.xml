@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cops.nc65.dao.SaleOrderDao">
+    <select id="getAll" resultType="com.cops.entity.nc65.SaleOrder">
+        SELECT
+            ss_saleorder.csaleorderid sale_order_id,
+            ss_saleorder.vbillcode bill_code,
+            ss_saleorder.vdef1 customer_code,
+            ccustomer_customer.name customer_name,
+            ccustomer_customer.shortname customer_short_name,
+            ss_saleorder.vdef2 pi,
+            ss_saleorder.ntotalnum total_num,
+            ss_saleorder.fstatusflag status,
+            cemployeeid_psndoc.name sale_user,
+            billmaker_user.user_name bill_maker,
+            ss_saleorder.dmakedate make_date,
+            ss_saleorder.dbilldate bill_date,
+            approver_user.user_name approver_user,
+            ss_saleorder.vnote note
+        FROM
+            nc65.so_saleorder ss_saleorder
+            LEFT JOIN nc65.sm_user approver_user ON ss_saleorder.approver = approver_user.cuserid
+            LEFT JOIN nc65.sm_user billmaker_user ON ss_saleorder.billmaker = billmaker_user.cuserid
+            LEFT JOIN nc65.bd_psndoc cemployeeid_psndoc ON ss_saleorder.cemployeeid = cemployeeid_psndoc.pk_psndoc
+            LEFT JOIN nc65.bd_customer ccustomer_customer ON ss_saleorder.ccustomerid = ccustomer_customer.pk_customer
+        WHERE
+            ss_saleorder.fstatusflag = 2 AND approver_user.user_name = '徐亚丹'
+
+            AND ss_saleorder.csaleorderid = '1001A11000000025P422'
+        ORDER BY
+            ss_saleorder.dbilldate DESC
+    </select>
+
+    <select id="getPage" resultType="com.cops.entity.nc65.SaleOrder">
+        SELECT
+            ss_saleorder.csaleorderid sale_order_id,
+            ss_saleorder.vbillcode bill_code,
+            ss_saleorder.vdef1 customer_code,
+            ccustomer_customer.name customer_name,
+            ccustomer_customer.shortname customer_short_name,
+            ss_saleorder.vdef2 pi,
+            ss_saleorder.ntotalnum total_num,
+            ss_saleorder.fstatusflag status,
+            cemployeeid_psndoc.name sale_user,
+            billmaker_user.user_name bill_maker,
+            ss_saleorder.dmakedate make_date,
+            ss_saleorder.dbilldate bill_date,
+            approver_user.user_name approver_user,
+            ss_saleorder.vnote note
+        FROM
+            nc65.so_saleorder ss_saleorder
+            LEFT JOIN nc65.sm_user approver_user ON ss_saleorder.approver = approver_user.cuserid
+            LEFT JOIN nc65.sm_user billmaker_user ON ss_saleorder.billmaker = billmaker_user.cuserid
+            LEFT JOIN nc65.bd_psndoc cemployeeid_psndoc ON ss_saleorder.cemployeeid = cemployeeid_psndoc.pk_psndoc
+            LEFT JOIN nc65.bd_customer ccustomer_customer ON ss_saleorder.ccustomerid = ccustomer_customer.pk_customer
+        <where>${ew.sqlSegment}</where>
+        ORDER BY
+            ss_saleorder.dbilldate DESC
+    </select>
+</mapper>

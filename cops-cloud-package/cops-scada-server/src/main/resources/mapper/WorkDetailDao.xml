@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cops.scada.dao.WorkDetailDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.cops.scada.entity.WorkDetail">
+    <result column="id" property="id" />
+    <result column="create_date" property="createDate" />
+    <result column="create_by" property="createBy" />
+    <result column="update_date" property="updateDate" />
+    <result column="update_by" property="updateBy" />
+    <result column="remarks" property="remarks" />
+    <result column="del_flag" property="delFlag" />
+        <result column="man_hour_id" property="manHourId" />
+        <result column="plan_day_id" property="planDayId" />
+        <result column="plan_id" property="planId" />
+        <result column="job_id" property="jobId" />
+        <result column="start_work_user_id" property="startWorkUserId" />
+        <result column="reimbursed_time" property="reimbursedTime" />
+        <result column="start_work_user_num" property="startWorkUserNum" />
+        <result column="start_in_num" property="startInNum" />
+        <result column="start_finish_num" property="startFinishNum" />
+        <result column="start_remarks" property="startRemarks" />
+        <result column="start_date" property="startDate" />
+        <result column="end_job_user_id" property="endJobUserId" />
+        <result column="end_quantity_count" property="endQuantityCount" />
+        <result column="end_quantity_remarks" property="endQuantityRemarks" />
+        <result column="end_scrap_count" property="endScrapCount" />
+        <result column="end_scrap_reason" property="endScrapReason" />
+        <result column="end_scrap_remarks" property="endScrapRemarks" />
+        <result column="end_repair_count" property="endRepairCount" />
+        <result column="end_repair_reason" property="endRepairReason" />
+        <result column="end_repair_remark" property="endRepairRemark" />
+        <result column="end_date" property="endDate" />
+    </resultMap>
+    <select id="getWorkDetailDao" resultType="com.cops.scada.entity.VO.WorkDetailVO">
+        select
+        plan_day.manufacture_date plan_day_manufacture_date,
+        plan_day.plan_num plan_day_plan_num,
+        plan_day.state plan_day_state,
+        plan_day.type plan_day_type,
+        plan.sn plan_sn,
+        plan.nc_id plan_nc_id,
+        job.sn job_sn,
+        job.name job_name,
+        product.sn product_sn,
+        product.name product_name,
+        work_user.nick_name work_user_nick_name,
+        work_detail.*
+        from scada_work_detail work_detail
+        left join scada_plan_day plan_day on work_detail.plan_day_id = plan_day.id
+        left join scada_plan plan on work_detail.plan_id = plan.id
+        left join scada_product product on plan.product_id = product.id
+        left join scada_job job on work_detail.job_id = job.id
+        left join sys_user work_user on work_detail.start_work_user_id = work_user.id
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+    <select id="getTotalWorkDetailVO" resultType="com.cops.scada.entity.VO.statistic.TotalWorkDetailVO">
+        SELECT
+            sum( start_work_user_num ) total_work_user_num,
+            sum( start_work_user_num * work_process_time ) total_work_time,
+            sum( end_quantity_count ) total_quantity_count
+        FROM
+            scada_work_detail
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+
+</mapper>

@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cops.scada.dao.ProduceDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.cops.scada.entity.Produce">
+        <result column="id" property="id"/>
+        <result column="create_date" property="createDate"/>
+        <result column="create_by" property="createBy"/>
+        <result column="update_date" property="updateDate"/>
+        <result column="update_by" property="updateBy"/>
+        <result column="remarks" property="remarks"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="sn" property="sn"/>
+        <result column="plan_id" property="planId"/>
+        <result column="customer_sn" property="customerSn"/>
+        <result column="result_a" property="resultA"/>
+        <result column="result_b" property="resultB"/>
+        <result column="result_c" property="resultC"/>
+        <result column="result_d" property="resultD"/>
+        <result column="result_e" property="resultE"/>
+        <result column="result_f" property="resultF"/>
+        <result column="result_g" property="resultG"/>
+        <result column="result_h" property="resultH"/>
+        <result column="result_i" property="resultI"/>
+        <result column="result_l" property="resultL"/>
+        <result column="state" property="state"/>
+    </resultMap>
+    <select id="getProduceVO" resultType="com.cops.scada.entity.VO.ProduceVO">
+        select produce.*, plan.sn planSN, product.sn productSN, product.type productType
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        left join scada_product product on plan.product_id = product.id
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+    <select id="getStatisticsProduceVO" resultType="com.cops.scada.entity.VO.StatisticsProduceVO">
+        select
+        (select count(*) total_count
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        where (plan.del_flag = 0 and produce.del_flag = 0) and produce.state = 0) as statistics_ready
+        ,
+        (select count(*) total_count
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        where (plan.del_flag = 0 and produce.del_flag = 0) and produce.state = 1) as statistics_going
+        ,
+        (select count(*) total_count
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        where (plan.del_flag = 0 and produce.del_flag = 0) and produce.state = 2 or produce.state = 7) as statistics_success
+        ,
+        (select count(*) total_count
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        where (plan.del_flag = 0 and produce.del_flag = 0) and (produce.state = 2 or produce.state = 7) and (date(produce.remarks) = date_sub(curdate(), interval 1 day))) as statistics_yesterday_success
+        ,
+        (select count(*) total_count
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        where (plan.del_flag = 0 and produce.del_flag = 0) and produce.state = 4 or produce.state = 5 or produce.state = 6) as statistics_error
+        ,
+        (select count(*) total_count
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        where (plan.del_flag = 0 and produce.del_flag = 0) and (produce.state = 5 or produce.state = 6)) as statistics_repair
+        ,
+        (select count(*) total_count
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        where (plan.del_flag = 0 and produce.del_flag = 0) and (produce.result_g = 1)) as statistics_package
+    </select>
+    <select id="exists" resultType="java.lang.Boolean">
+        select ifnull((select 1 from scada_produce
+        <where>
+            ${ew.sqlSegment}
+        </where>
+        limit 1), 0)
+    </select>
+    <select id="getStatisticsProduceVOByProductType" resultType="com.cops.scada.entity.VO.StatisticsProduceVO">
+        select
+        (select count(*) total_count
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        left join scada_product product on plan.product_id = product.id
+        where product.type = #{productType} and (plan.del_flag = 0 and produce.del_flag = 0) and produce.state = 0) as statistics_ready
+        ,
+        (select count(*) total_count
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        left join scada_product product on plan.product_id = product.id
+        where product.type = #{productType} and (plan.del_flag = 0 and produce.del_flag = 0) and produce.state = 1) as statistics_going
+        ,
+        (select count(*) total_count
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        left join scada_product product on plan.product_id = product.id
+        where product.type = #{productType} and (plan.del_flag = 0 and produce.del_flag = 0) and (produce.state = 2 or produce.state = 7)) as statistics_success
+        ,
+        (select count(*) total_count
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        left join scada_product product on plan.product_id = product.id
+        where product.type = #{productType} and (plan.del_flag = 0 and produce.del_flag = 0) and (produce.state = 2 or produce.state = 7) and (date(produce.remarks) = date_sub(curdate(), interval 1 day))) as statistics_yesterday_success
+        ,
+        (select count(*) total_count
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        left join scada_product product on plan.product_id = product.id
+        where product.type = #{productType} and (plan.del_flag = 0 and produce.del_flag = 0) and (produce.state = 4 or produce.state = 5 or produce.state = 6)) as statistics_error
+        ,
+        (select count(*) total_count
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        left join scada_product product on plan.product_id = product.id
+        where product.type = #{productType} and (plan.del_flag = 0 and produce.del_flag = 0) and (produce.state = 5 or produce.state = 6)) as statistics_repair
+        ,
+        (select count(*) total_count
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        left join scada_product product on plan.product_id = product.id
+        where product.type = #{productType} and (plan.del_flag = 0 and produce.del_flag = 0) and (produce.result_g = 1)) as statistics_package
+    </select>
+    <select id="getStatisticsProduceVOByTypeAndDate" resultType="com.cops.scada.entity.VO.StatisticsProduceVO">
+        select
+        (select count(*) total_count
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        left join scada_product product on plan.product_id = product.id
+        where (plan.tag_start_date between #{startDate} and #{endDate}) and product.type = #{productType} and (plan.del_flag = 0 and produce.del_flag = 0) and produce.state = 0) as statistics_ready
+        ,
+        (select count(*) total_count
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        left join scada_product product on plan.product_id = product.id
+        where (plan.tag_start_date between #{startDate} and #{endDate}) and product.type = #{productType} and (plan.del_flag = 0 and produce.del_flag = 0) and produce.state = 2) as statistics_perfect
+        ,
+        (select count(*) total_count
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        left join scada_product product on plan.product_id = product.id
+        where (plan.tag_start_date between #{startDate} and #{endDate}) and product.type = #{productType} and (plan.del_flag = 0 and produce.del_flag = 0) and produce.state = 1) as statistics_going
+        ,
+        (select count(*) total_count
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        left join scada_product product on plan.product_id = product.id
+        where (plan.tag_start_date between #{startDate} and #{endDate}) and product.type = #{productType} and (plan.del_flag = 0 and produce.del_flag = 0) and (produce.state = 2 or produce.state = 7)) as statistics_success
+        ,
+        (select count(*) total_count
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        left join scada_product product on plan.product_id = product.id
+        where (plan.tag_start_date between #{startDate} and #{endDate}) and product.type = #{productType} and (plan.del_flag = 0 and produce.del_flag = 0) and (produce.state = 2 or produce.state = 7) and (date(produce.remarks) = date_sub(curdate(), interval 1 day))) as statistics_yesterday_success
+        ,
+        (select count(*) total_count
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        left join scada_product product on plan.product_id = product.id
+        where (plan.tag_start_date between #{startDate} and #{endDate}) and product.type = #{productType} and (plan.del_flag = 0 and produce.del_flag = 0) and (produce.state = 4 or produce.state = 5 or produce.state = 6)) as statistics_error
+        ,
+        (select count(*) total_count
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        left join scada_product product on plan.product_id = product.id
+        where (plan.tag_start_date between #{startDate} and #{endDate}) and product.type = #{productType} and (plan.del_flag = 0 and produce.del_flag = 0) and (produce.state = 5 or produce.state = 6)) as statistics_repair
+        ,
+        (select count(*) total_count
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        left join scada_product product on plan.product_id = product.id
+        where (plan.tag_start_date between #{startDate} and #{endDate}) and product.type = #{productType} and (plan.del_flag = 0 and produce.del_flag = 0) and (produce.result_g = 1)) as statistics_package
+        ,
+        (select count(*) total_count
+        from scada_produce produce
+        left join scada_plan plan on produce.plan_id = plan.id
+        left join scada_product product on plan.product_id = product.id
+        where (plan.tag_start_date between #{startDate} and #{endDate}) and product.type = #{productType} and (plan.del_flag = 0 and produce.del_flag = 0) and (produce.result_f = 1)) as statistics_final_test
+    </select>
+    <select id="getOneByPlanSN" resultType="com.cops.scada.entity.Produce">
+        select * from  scada_produce
+        <where>
+            ${ew.sqlSegment}
+        </where>
+        limit 0,1
+    </select>
+</mapper>

@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cops.scada.dao.SiteStasDao">
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.cops.scada.entity.VO.SiteStasVO">
+        <result column="value1" property="value1"/>
+        <result column="value2" property="value2"/>
+        <result column="value3" property="value3"/>
+        <result column="value4" property="value4"/>
+        <result column="value5" property="value5"/>
+    </resultMap>
+
+<!--    产品总条数-->
+    <select id="getSiteStasTypeCount" resultType="com.cops.scada.entity.VO.SiteStasVO">
+        SELECT
+            product.sn value1,
+            tab1.sn value2,
+            tab1.quantity value3,
+            tab1.create_date value4
+        FROM
+            ${ tabname } tab1
+            LEFT JOIN scada_product product ON product.id = tab1.product_id
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+
+    <select id="getSiteStasTypeCount2" resultType="com.cops.scada.entity.VO.SiteStasVO">
+        SELECT
+            COUNT( 1 ) value1
+        FROM
+        (
+            SELECT
+                COUNT( 1 )
+            FROM
+                ${ tabname } tab1
+                LEFT JOIN scada_produce produce ON tab1.produce_id = produce.id
+                LEFT JOIN scada_plan plan ON plan.id = produce.plan_id
+                LEFT JOIN scada_product product ON product.id = plan.product_id
+            <where>
+                ${ew.sqlSegment}
+            </where>
+            GROUP BY
+                tab1.produce_id
+        ) tab;
+    </select>
+
+
+    <!--    测试总个数-->
+    <select id="getSiteStasALLTestRecordCount" resultType="com.cops.scada.entity.VO.SiteStasVO">
+        SELECT
+        COUNT(1) value1
+        FROM
+            ${ tabname } tab1
+            LEFT JOIN scada_produce produce ON tab1.produce_id = produce.id
+            LEFT JOIN scada_plan plan ON plan.id = produce.plan_id
+            LEFT JOIN scada_product product ON product.id = plan.product_id
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+<!--    测试正常个数-->
+    <select id="getSiteStasTestOKRecordCount" resultType="com.cops.scada.entity.VO.SiteStasVO">
+        SELECT
+        COUNT(1) value1
+        FROM
+        ${ tabname } tab1
+            LEFT JOIN scada_produce produce ON tab1.produce_id = produce.id
+            LEFT JOIN scada_plan plan ON plan.id = produce.plan_id
+            LEFT JOIN scada_product product ON product.id = plan.product_id
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+<!--测试失败个数-->
+    <select id="getSiteStasTestFailRecordCount" resultType="com.cops.scada.entity.VO.SiteStasVO">
+        SELECT
+        COUNT(1) value1
+        FROM
+        ${ tabname } tab1
+            LEFT JOIN scada_produce produce ON tab1.produce_id = produce.id
+            LEFT JOIN scada_plan plan ON plan.id = produce.plan_id
+            LEFT JOIN scada_product product ON product.id = plan.product_id
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+
+<!--重复测试个数-->
+    <select id="getSiteStasTestRedoRecordCount" resultType="com.cops.scada.entity.VO.SiteStasVO">
+        SELECT
+            count( 1 ) value1
+        FROM
+            (
+            SELECT
+                temp.sn
+            FROM
+                (
+                SELECT
+                    produce.sn,
+                    count( tab1.id ) AS count
+                FROM
+                    ${ tabname } tab1
+                    LEFT JOIN scada_produce produce ON tab1.produce_id = produce.id
+                    LEFT JOIN scada_plan plan ON plan.id = produce.plan_id
+                    LEFT JOIN scada_product product ON product.id = plan.product_id
+                <where>
+                    ${ew.sqlSegment}
+                </where>
+                GROUP BY
+                    tab1.produce_id
+                HAVING
+                    count > 1
+                ) temp
+            GROUP BY
+            temp.sn
+            ) temp1;
+    </select>
+
+</mapper>

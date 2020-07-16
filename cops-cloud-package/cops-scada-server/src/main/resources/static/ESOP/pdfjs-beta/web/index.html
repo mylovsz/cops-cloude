@@ -1,0 +1,201 @@
+﻿<!DOCTYPE html>
+<html lang="en" class="app">
+<head>
+    <meta charset="utf-8" />
+    <title>ESOP站点登陆</title>
+    <meta name="description" content="app, web app, responsive, admin dashboard, admin, flat, flat ui, ui kit, off screen nav" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <link rel="stylesheet" href="loginstyle/css/bootstrap.css" type="text/css" />
+    <link rel="stylesheet" href="loginstyle/css/simple-line-icons.css" type="text/css" />
+    <link rel="stylesheet" href="loginstyle/css/app.css" type="text/css" />
+
+    <link rel="stylesheet" href="layui/layui/css/layui.css">
+    <script type="text/javascript" src="layui/layui/layui.js"></script>
+
+</head>
+
+<body background="loginstyle/images/bodybg.jpg">
+    <section id="content" class="m-t-lg wrapper-md animated fadeInUp ">
+        <div class="container aside-xl" style="margin-top: 100px;">
+            <a class="navbar-brand block">
+                <span class="h1 font-bold" style="color: #ffffff">ESOP站点登陆</span>
+            </a>
+
+            <section class="m-b-lg">
+                <form action="javascript:;" method="post">
+                    <div>
+                        <label for="sel1" style="float:left; font-size:24px;color:white; margin-top:5px;">车间:</label>
+
+                        <select id="chejian" class="form-control" style="font-size:20px;height:40px;" >
+                            <option>--请选择--</option>
+                            <!-- <option>车间1</option>
+                            <option>车间2</option> -->
+                        </select>
+                        <br>
+                    </div>
+                    <div>
+                        <label for="sel1" style="float:left;font-size:24px;color:white;">产线:</label>
+                        <select id="chanxian" class="form-control" style="font-size:20px;height:40px;">
+                            <option>--请选择--</option>    
+                        <!-- <option>产线1</option>
+                            <option>产线2</option>
+                            <option>产线3</option>
+                            <option>产线4</option> -->
+                        </select>
+                        <br>
+                    </div>
+                    <div>
+                        <label for="sel1" style="float:left;font-size:24px;color:white;">站点:</label>
+                        <select id="zhandian" class="form-control" style="font-size:20px;height:40px;">
+                            <option>--请选择--</option>
+                            <!-- <option>插件</option>
+                            <option>补焊</option>
+                            <option>初检</option>
+                            <option>组装</option>
+                            <option>耐压</option>
+                            <option>点火</option>
+                            <option>老化</option>
+                            <option>终检</option>
+                            <option>包装</option>
+                            <option>其他</option> -->
+                        </select>
+                        <br>
+                    </div>
+                    <div>
+                        <p class="form-inline">
+                            <button type="button" class="btn btn-info " style="width:165px;" onclick="onLinePage()">上线</button>
+                            <button type="button" class="btn  " style="width:160px;" onclick="offLinePage()">离线</button>
+                        </p>
+                    </div>
+                    <div style="text-align:center; margin-top:20px;">
+                        <label style="font-size:20px;margin-top:5px;">
+                            <span style="color:white">服务器状态：</span>
+                            <span id="serverState" style="color:white">N/A</span>
+                            <a class="btn btn-info" style="margin-top:-5px">
+                                <i class="icon icon-refresh" style="font-size: 20px; color:white;" onclick="refresh()"></i>
+                            </a>
+                        </label>
+                    </div>
+                </form>
+            </section>
+        </div>
+    </section>
+    <!-- footer -->
+    <footer id="footer">
+        <div class="text-center padder">
+
+        </div>
+    </footer>
+</body>
+</html>
+
+<script src="myLayUI.js"></script>
+<!-- <script src="https://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script> -->
+<script src="jquery-3.3.1/jquery-3.3.1.min.js"></script>
+<script>
+
+var datas;//服务器数据
+var iNum1;
+var iNum2;
+var iNum3;
+
+function refresh(){
+    $(function () {
+        $("#serverState").html("N/A").css("color","white");
+        var url="http://192.168.1.244:8081/api/factorySite";
+        $.get(url, function (data,status) {//请求服务器的数据，加载到车间
+            if(status=='success')
+            {
+                datas = data.data;
+                //initCheJianSelect($("#chejian"),datas);
+                document.getElementById('chejian').options.length = 0;
+                $('#chejian').append('<option>--请选择--</option>');
+
+                for(var i=0;i<datas.length;i++){
+                    $('#chejian').append('<option>'+datas[i].name+'</option>');
+                };
+                $("#serverState").html("连接正常").css("color","greenyellow");
+            }
+            else
+            {
+                $("#serverState").html("连接失败").css("color","red");
+            }
+        });
+    })
+}
+refresh();
+
+$('#chejian').change(function () {//车间选择改变事件
+    document.getElementById('chanxian').options.length = 0;//$('#chanxian').children().not(':eq(0)').remove();
+    document.getElementById('zhandian').options.length = 0; //('#zhandian').children().not(':eq(0)').remove();
+    $('#chanxian').append('<option>--请选择--</option>');
+    $('#zhandian').append('<option>--请选择--</option>');
+
+    iNum1 = $(this).children('option:selected').index();
+    if(iNum1>0){
+        var aaCity = datas[iNum1-1].children;//获取车间索引
+        for(var j=0;j<aaCity.length;j++){//加载车间下的产线
+            $('#chanxian').append('<option>'+aaCity[j].name+'</option>');
+        }
+    }
+});
+
+$('#chanxian').change(function () {//产线选择改变事件
+    document.getElementById('zhandian').options.length = 0;//$('#zhandian').children().not(':eq(0)').remove();
+    $('#zhandian').append('<option>--请选择--</option>');
+
+    iNum2 = $(this).children('option:selected').index();//获取产线索引
+    if(iNum1>0&&iNum2>0)
+    {
+        var aaCountry = datas[iNum1-1].children[iNum2-1].children;
+        for(var k=0;k<aaCountry.length;k++){
+            $('#zhandian').append('<option>'+aaCountry[k].name+'</option>');
+        }
+    }
+})
+
+//在线登录
+function onLinePage()
+{
+    // var localTest = layui.sessionData('ESOP');
+    // console.log(localTest.ESOPInfo);
+    iNum3 = $("#zhandian").children('option:selected').index();
+    if(iNum1>0 && iNum2>0 && iNum3>0)
+    {
+        var ESOP={
+            chejian:$("#chejian option:checked").text(),
+            chanxian:$("#chanxian option:checked").text(),
+            zhandian:$("#zhandian option:checked").text(),
+        }
+        layui.sessionData('ESOP',{key:'ESOPInfo',value:ESOP});
+
+        var localTest = layui.sessionData('ESOP');
+        console.log(localTest.ESOPInfo);
+        window.location.href='onLine-viewer.html';
+    }
+    else 
+    {
+        layer.alert('请填写站点信息'); 
+    }
+}
+
+//离线登录页面
+function offLinePage()
+{
+    iNum3 = $("#zhandian").children('option:selected').index();
+    if(iNum1>0 && iNum2>0 && iNum3>0)
+    {
+        var ESOP={
+            chejian:$("#chejian option:checked").text(),
+            chanxian:$("#chanxian option:checked").text(),
+            zhandian:$("#zhandian option:checked").text(),
+        }
+        layui.data('ESOPLocal',{key:'ESOPInfo',value:ESOP});
+
+        var localTest = layui.sessionData('ESOP');
+        console.log(localTest.ESOPInfo);
+    }
+    layer.alert('离线模式<br\>请自行选择SOP文件',function (){window.location.href='offLine-viewer.html';});  
+}
+</script>
+

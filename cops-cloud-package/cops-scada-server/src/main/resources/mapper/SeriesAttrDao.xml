@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.cops.scada.dao.SeriesAttrDao">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.cops.scada.entity.SeriesAttr">
+        <result column="id" property="id"/>
+        <result column="parent_id" property="parentId"/>
+        <result column="parent_ids" property="parentIds"/>
+        <result column="level" property="level"/>
+        <result column="sort" property="sort"/>
+        <result column="create_date" property="createDate"/>
+        <result column="update_date" property="updateDate"/>
+        <result column="remarks" property="remarks"/>
+        <result column="del_flag" property="delFlag"/>
+        <result column="name" property="name"/>
+        <result column="name_en" property="nameEn"/>
+        <result column="value_type" property="valueType"/>
+        <result column="is_search" property="isSearch"/>
+        <result column="company" property="company" />
+    </resultMap>
+    <update id="updateSeriesAndAttrSort"  parameterType="java.util.List">
+        update scada_series_and_attr set sort =
+        <foreach collection="models" item="model" index="index" separator=" " open="case id" close="end">
+            when #{model.id,jdbcType=BIGINT} then #{model.sort,jdbcType=INTEGER}
+        </foreach>
+        ,series_attr_id =
+        <foreach collection="models" item="model" index="index" separator=" " open="case id" close="end">
+            when #{model.id,jdbcType=BIGINT} then #{model.seriesAttrId,jdbcType=VARCHAR}
+        </foreach>
+        ,series_id=
+        <foreach collection="models" item="model" index="index" separator=" " open="case id" close="end">
+            when #{model.id,jdbcType=BIGINT} then #{model.seriesId,jdbcType=TIMESTAMP}
+        </foreach>
+        where id in
+        <foreach collection="models" index="index" item="model" separator="," open="(" close=")">
+        #{model.id,jdbcType=BIGINT}
+        </foreach>
+    </update>
+
+    <select id="selectBySeriesId" resultMap="BaseResultMap">
+        select a.* from scada_series_attr a
+        left join scada_series_and_attr b on b.series_attr_id = a.id
+        where b.series_id = ${id}
+        order by b.sort asc
+    </select>
+
+    <resultMap id="SeriesAndAttr" type="com.cops.scada.entity.SeriesAndAttr">
+        <result column="id" property="id"/>
+        <result column="series_attr_id" property="seriesAttrId"/>
+        <result column="series_id" property="seriesId"/>
+    </resultMap>
+    <select id="selectAttrIdsBySeriesId" resultMap="SeriesAndAttr">
+        select * from scada_series_and_attr where series_id = ${id} order by sort asc
+    </select>
+    <select id="listBy" resultType="com.cops.scada.entity.SeriesAttr">
+        select series_attr.* from scada_series_attr series_attr
+        left join scada_series_and_attr series_and_attr on series_and_attr.series_attr_id = series_attr.id
+        <where>
+            ${ew.sqlSegment}
+        </where>
+    </select>
+    <delete id="deleteAttrCognate">
+        delete from scada_series_and_attr
+        <foreach collection="ids" item="id" separator="," open=" where id in (" close=")">
+            #{id,jdbcType=BIGINT}
+        </foreach>
+    </delete>
+    <insert id="addAttrCogonate">
+        insert into scada_series_and_attr(series_id, series_attr_id,sort)
+        values
+        <foreach collection="models" item="model" separator="," open="" close="">
+            (
+            #{model.seriesId,jdbcType=BIGINT},
+            #{model.seriesAttrId,jdbcType=BIGINT},
+            #{model.sort,jdbcType=BIGINT}
+            )
+        </foreach>
+    </insert>
+</mapper>

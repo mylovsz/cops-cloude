@@ -1,0 +1,67 @@
+server:
+  port: 8801
+
+spring:
+  application:
+    name: cops-nc65-server
+  profiles:
+    active: dev_win
+  # 测试使用，后期都会搬移到SVN上面
+  datasource:
+    url: jdbc:oracle:thin:@192.168.1.240:1521:NCTEST
+    username: nc65
+    password: Lumlux123
+    driver-class-name: oracle.jdbc.OracleDriver
+#mybatisPlus
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.cops.nc65.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  #实体扫描，多个package用逗号或者分号隔离
+  type-aliases-package: com.cops.nc65.entity
+  global-config:
+    #主键类型  0:"数据库ID自增", 1:"用户输入ID",2:"全局唯一ID (数字类型唯一ID)", 3:"全局唯一ID UUID";
+    id-type: 3
+    #字段策略 0:"忽略判断",1:"非 NULL 判断"),2:"非空判断"
+    field-strategy: 2
+    #驼峰下划线转换
+    db-column-underline: true
+    #刷新mapper 调试神器
+    refresh-mapper: true
+    #数据库大写下划线转换
+    #capital-mode: true
+    #序列接口实现类配置
+    #key-generator: com.baomidou.springboot.xxx
+    #逻辑删除配置
+    #    logic-delete-value: 1
+    #    logic-not-delete-value: 0
+    #自定义填充策略接口实现
+    #metaObjectHandler: com.cops.scada.config.SysMetaObjectHandler
+    #自定义SQL注入器
+    #sql-injector: com.baomidou.springboot.xxx
+  configuration:
+    map-underscore-to-camel-case: true
+    cache-enabled: false
+#    jdbc-type-for-null: 'null'
+
+#日志
+logging:
+  config: classpath:log/logback.xml
+  path: D:\cops_scada\log
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    lease-expiration-duration-in-seconds: 10
+    lease-renewal-interval-in-seconds: 5
+
+---
+#开发环境配置
+spring:
+  profiles: dev_win

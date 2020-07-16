@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.cops.nc65.dao.SaleOrderDetailDao">
+    <select id="getSaleOrderDetail" resultType="com.cops.entity.nc65.SaleOrderDetail">
+        SELECT
+            bm_material.pk_material material_id,---"物料主键",
+            bm_material.code material_code,---"物料编码",
+            bm_material.name material_name,---"类型",
+            bm_material.materialspec material_spec,---"规格",
+            ssb_saleorder.nastnum sale_order_num,---"订单需求数量",
+            ssb_saleorder.dbilldate sale_order_bill_date,---"单据日期",
+            ssb_saleorder.dreceivedate sale_order_receive_date,---"到货日期",
+            ssb_saleorder.dsenddate sale_order_send_date --"发货日期"
+        FROM
+            nc65.so_saleorder_b ssb_saleorder
+            LEFT JOIN nc65.bd_material bm_material ON ssb_saleorder.cmaterialvid = bm_material.pk_material
+        WHERE
+            ssb_saleorder.csaleorderid = '1001A11000000025P422'
+    </select>
+
+    <select id="getSaleOrderDetails" resultType="com.cops.entity.nc65.SaleOrderDetail">
+        SELECT
+            bm_material.pk_material material_id,---"物料主键",
+            bm_material.code material_code,---"物料编码",
+            bm_material.name material_name,---"类型",
+            bm_material.materialspec material_spec,---"规格",
+            ssb_saleorder.nastnum sale_order_num,---"订单需求数量",
+            ssb_saleorder.dbilldate sale_order_bill_date,---"单据日期",
+            ssb_saleorder.dreceivedate sale_order_receive_date,---"到货日期",
+            ssb_saleorder.dsenddate sale_order_send_date --"发货日期"
+        FROM
+            nc65.so_saleorder_b ssb_saleorder
+            LEFT JOIN nc65.bd_material bm_material ON ssb_saleorder.cmaterialvid = bm_material.pk_material
+        <where>${ew.sqlSegment}</where>
+
+    </select>
+</mapper>
